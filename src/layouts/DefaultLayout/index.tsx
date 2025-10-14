@@ -1,9 +1,12 @@
-import Navbar from '../../components/Navbar'
+
+import { Outlet } from "react-router-dom";
+import BasicMenu from "../../pages/components/Navbar";
 
 function DefaultLayout() {
   return (
     <>
-        <Navbar/>
+      <BasicMenu/>
+      <Outlet/>
     </>
   )
 }

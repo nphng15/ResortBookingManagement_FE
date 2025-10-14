@@ -6,9 +6,10 @@ function AppRoutes(){
     return (
         <Router>
             <Routes>
-                {/* <Route element={<DefaultLayout/>}> */}
+                <Route element={<DefaultLayout/>}>
                     <Route path="/" element={<HomePage/>} />
-                {/* </Route> */}
+
+                </Route>
             </Routes>
         </Router>
     )

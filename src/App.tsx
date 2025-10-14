@@ -1,7 +1,13 @@
-import AppRoutes from "./routes"
+import AppRoutes from './routes';
+import './index.css';
 
 function App() {
-  return <AppRoutes />;
+  console.log("tao ne")
+  return (
+    <div className="App">
+      <AppRoutes />
+    </div>
+  );
 }
 
-export default App
+export default App;
