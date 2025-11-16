@@ -1,0 +1,31 @@
+@import "tailwindcss";
+/* Container chung */
+.container {
+  @apply flex flex-col gap-3 py-2 font-sans;
+}
+
+/* 1. Tiện nghi chính (20.0 m²) */
+.mainFacility {
+  @apply text-[1.1rem] font-semibold text-[#111];
+}
+
+/* 2. Danh sách tiện nghi phụ */
+.list {
+  @apply grid gap-2;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+/* Áp dụng cho tất cả item */
+.item {
+  @apply flex items-center gap-2 text-[0.9rem] text-[#444];
+}
+
+/* Icon */
+.icon {
+  @apply flex items-center text-[#333];
+}
+
+/* Chữ */
+.text {
+  @apply leading-snug;
+}

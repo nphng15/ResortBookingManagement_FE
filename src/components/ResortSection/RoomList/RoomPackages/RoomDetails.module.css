@@ -1,0 +1,44 @@
+@import "tailwindcss";
+/* Container chung */
+.container {
+  @apply flex flex-col gap-[10px] py-2 font-sans;
+}
+
+/* Style cho 1 dòng (item) */
+.item {
+  @apply flex items-start gap-2 text-[0.9rem];
+}
+
+.icon {
+  @apply flex items-center mt-[2px] shrink-0;
+}
+
+.text {
+  @apply leading-[1.5];
+}
+
+/* --- THEMES bằng Tailwind (@apply) --- */
+
+/* 1. Mặc định */
+.themeDefault {
+  @apply text-[#333];
+}
+.themeDefault .icon {
+  @apply text-[#555];
+}
+
+/* 2. Highlight */
+.themeHighlight {
+  @apply text-[#0056b3] font-medium;
+}
+.themeHighlight .icon {
+  @apply text-[#007bff];
+}
+
+/* 3. Success */
+.themeSuccess {
+  @apply text-[#155724] font-medium;
+}
+.themeSuccess .icon {
+  @apply text-[#28a745];
+}

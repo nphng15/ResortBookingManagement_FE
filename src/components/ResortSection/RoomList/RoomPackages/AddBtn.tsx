@@ -1,11 +1,24 @@
-import React from 'react'
+import React from 'react';
+import styles from './AddBtn.module.css';
 
-function AddBtn() {
-  return (
-    <div>
-      Addbtn
-    </div>
-  )
+interface AddButtonProps {
+  onClick: () => void;
+  text?: string;
+  disabled?: boolean;
 }
 
-export default AddBtn
+function AddBtn({ onClick, text, disabled }: AddButtonProps) {
+  const buttonText = text || 'Chọn';
+
+  return (
+    <button
+      className={`${styles.addBtn} ${disabled ? styles.disabled : ''}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {buttonText}
+    </button>
+  );
+}
+
+export default AddBtn;
