@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, react from 'react';
 
 function LoginForm() {
-  const [form, setForm] = useState({
+  const [form, setForm] = react.useState({
     email: '',
     password: '',
   });
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
-  const [success, setSuccess] = useState(false);
+  const [errors, setErrors] = react.useState<{ [key: string]: string }>({});
+  const [touched, setTouched] = react.useState<{ [key: string]: boolean }>({});
+  const [success, setSuccess] = react.useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
