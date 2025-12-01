@@ -1,0 +1,10 @@
+@import "tailwindcss";
+/* Vùng chứa component */
+.container {
+  @apply pb-2;
+}
+
+/* Dòng chữ tóm tắt */
+.summary {
+  @apply m-0 font-sans text-base font-bold text-[#333] leading-[1.5];
+}

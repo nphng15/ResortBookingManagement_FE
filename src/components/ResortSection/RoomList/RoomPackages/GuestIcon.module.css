@@ -1,0 +1,24 @@
+@import "tailwindcss";
+.container {
+  @apply flex items-center gap-4 py-2 text-gray-600;
+}
+
+.guestSection {
+  @apply flex items-center gap-1.5;
+}
+
+.icon {
+  @apply flex items-center text-gray-800;
+}
+
+.guestCount {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.childSection {
+  @apply flex items-center;
+}
+
+.childIcon {
+  @apply flex items-center text-gray-500;
+}

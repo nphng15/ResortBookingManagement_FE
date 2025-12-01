@@ -1,0 +1,54 @@
+@import "tailwindcss";
+/* Bọc ngoài table */
+.tableWrapper {
+  @apply mt-5 w-full overflow-x-auto rounded-lg border border-gray-300;
+}
+
+/* Bảng */
+.roomTable {
+  @apply w-full border-collapse font-sans;
+}
+
+/* Hàng tiêu đề (thead tr) */
+.tableHeaderRow {
+  @apply bg-gray-50;
+}
+
+/* Các ô tiêu đề (th) */
+.roomTable th {
+  @apply border-b border-r border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-600;
+}
+
+/* Các ô dữ liệu (td) */
+.roomTable td {
+  @apply border-b border-r border-gray-300 p-4 align-middle bg-white;
+}
+
+/* Ẩn đường kẻ cuối cùng của bảng */
+.roomTable tbody tr:last-child td {
+  @apply border-b-0;
+}
+
+/* Ẩn đường kẻ dọc cuối cùng */
+.roomTable th:last-child,
+.roomTable td:last-child {
+  @apply border-r-0;
+}
+
+/* --- Định nghĩa chiều rộng cột --- */
+
+.colRoom {
+  @apply w-[45%];
+}
+
+.colGuest {
+  @apply min-w-[100px] w-[15%];
+}
+
+.colPrice {
+  @apply min-w-[150px] w-[25%];
+}
+
+.colAction {
+  @apply min-w-[120px] w-[15%] align-middle; /* Riêng cột này căn giữa */
+}
