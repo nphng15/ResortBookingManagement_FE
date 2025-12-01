@@ -1,8 +1,11 @@
+import LoginForm from "./LoginForm"
+import SignupForm from "./SignupForm"
 
 function AuthSection() {
   return (
     <div>
-      AuthContainer
+      {/*<SignupForm/>*/}
+      <LoginForm/>
     </div>
   )
 }
