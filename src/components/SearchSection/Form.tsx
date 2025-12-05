@@ -5,13 +5,23 @@ import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import SearchIcon from '@mui/icons-material/Search'
-import React from 'react'
-import MenuItem from '@mui/material/MenuItem'
 import DateRangePicker from './DateRangePicker'
+import GuestRoomPicker from './GuestRoomPicker'
+import { useState } from 'react'
 
 function Form() {
-  return (
-    <Container sx={{ px: '0 !important'}}>
+    const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+    const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+    const [guests, setGuests] = useState(2);
+    const [rooms, setRooms] = useState(1);
+    const [destination, setDestination] = useState('');
+// TODO: cần tối ưu state destination -> đợi user ngừng nhập thì mới update state
+
+    const handleSearch = () => {
+        console.log(`${destination} ${selectedStartDate} ${selectedEndDate} ${guests} ${rooms}`);
+    }
+    return (
+    <Container sx={{ px: '0 !important', py: '10rem'}}>
         {/* Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
             <Typography 
@@ -41,63 +51,57 @@ function Form() {
         {/* Search Form */}
         <Box sx={{ 
             p: 3, 
-            backgroundColor: 'rgba(255,255,255,0.95)', 
+            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
             borderRadius: 3,
             boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
             backdropFilter: 'blur(10px)'
         }}>
-            <Box sx={{ mb: 3 }}>
-                <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 500 }}>
-                    Điểm đến
-                </Typography>
-                <TextField 
-                    fullWidth 
-                    placeholder="Tìm kiếm resort, khách sạn..."
-                    InputProps={{
-                        startAdornment: <SearchIcon sx={{ mr: 1, color: 'grey.400' }} />
-                    }}
-                    sx={{ 
-                        '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
-                            '&:hover fieldset': {
-                                borderColor: 'primary.main'
-                            }
-                        }
-                    }}
-                />
-            </Box>
-
             <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 6 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 500 }}>
-                        Ngày nhận - trả phòng
-                    </Typography>
-                    <DateRangePicker />
-                </Grid>
-                
-                <Grid size={{ xs: 12, md: 4 }}>
-                    <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 500 }}>
-                        Số khách & phòng
+                <Grid size={{ xs: 12, md: 8 }} sx={{ mb: 3}}>
+                    <Typography variant="body2" sx={{ fontSize:'1rem', mb: 1, color: 'text.secondary', fontWeight: 500 }}>
+                        Điểm đến
                     </Typography>
                     <TextField
-                        fullWidth
-                        select
-                        defaultValue="1"
+                        fullWidth 
+                        placeholder="Tìm kiếm resort, khách sạn..."
+                        value={destination}
+                        onChange={(e) => setDestination(e.target.value)}
+                        InputProps={{
+                            startAdornment: <SearchIcon sx={{ mr: 1, color: 'grey.400' }} />
+                        }}
                         sx={{ 
                             '& .MuiOutlinedInput-root': {
-                                borderRadius: 2
+                                borderRadius: 2,
+                                '&:hover fieldset': {
+                                    borderColor: 'primary.main'
+                                }
                             }
                         }}
-                    >
-                        <MenuItem value="1">1 người, 1 phòng</MenuItem>
-                        <MenuItem value="2">2 người, 1 phòng</MenuItem>
-                        <MenuItem value="3">3 người, 1 phòng</MenuItem>
-                        <MenuItem value="4">4 người, 2 phòng</MenuItem>
-                    </TextField>
+                    />
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
+                    <GuestRoomPicker 
+                        guests={guests}
+                        rooms={rooms}
+                        setGuests={setGuests}
+                        setRooms={setRooms}
+                    />
+                </Grid>
+            </Grid>
+
+            <Grid container spacing={3}>
+                <Grid size={{ xs: 12, md: 8 }}>
+                    <DateRangePicker 
+                        selectedStartDate={selectedStartDate}
+                        selectedEndDate={selectedEndDate}
+                        setSelectedStartDate={setSelectedStartDate}
+                        setSelectedEndDate={setSelectedEndDate}
+                    />
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 2 }} sx={{ display: 'flex', alignItems: 'end' }}>
+                <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex', alignItems: 'center' }}>
                     <Button 
+                        onClick={handleSearch}
                         fullWidth 
                         variant="contained" 
                         size="large"
