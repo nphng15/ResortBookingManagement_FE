@@ -1,15 +1,22 @@
 import AppRoutes from './routes';
 import './index.css';
-import HomePage from './pages/Homepage';
+import ResortList from './pages/ResortList';
+import Navbar from './layouts/DefaultLayout/components/Navbar';
+import { BrowserRouter } from 'react-router';
+import ResortDetails from './pages/ResortDetails';
+import ResortReview from './components/ResortSection/ResortReview';
+import Footer from './layouts/DefaultLayout/components/Footer';
 
 
 function App() {
-  console.log("tao ne")
   return (
-    <div className="App">
-      {/* <AppRoutes /> */}
-      {/* <HomePage/> */}
-    </div>
+    <BrowserRouter>
+      <div className="App">
+        <Navbar />
+        {/* <ResortList/> */}
+        {/* <ResortDetails/> */}
+      </div>
+    </BrowserRouter>
   );
 }
 

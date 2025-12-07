@@ -1,12 +1,14 @@
 
 import { Outlet } from "react-router-dom";
-// import BasicMenu from "../../pages/components/Navbar";
+import Navbar from "../DefaultLayout/components/Navbar";
+import Footer from "../DefaultLayout/components/Footer";
 
 function DefaultLayout() {
   return (
     <>
-      <BasicMenu/>
+      <Navbar/>
       <Outlet/>
+      <Footer/>
     </>
   )
 }

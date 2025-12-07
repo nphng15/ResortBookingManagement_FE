@@ -18,9 +18,6 @@ function RoomList() {
         <div className={styles.roomLeft}>
           <RoomImagePreview images={[]} />
           <RoomFacilities />
-          <a href="#" className={styles.detailLink}>
-            Xem chi tiết phòng
-          </a>
         </div>
 
         {/* PHẢI: BẢNG GÓI PHÒNG */}

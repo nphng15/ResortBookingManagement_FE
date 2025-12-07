@@ -33,17 +33,11 @@ function ResortCard({name, address, images, rating, reviews, priceOriginal, pric
 
             {/* Hotels + stars + badge */}
             <div className="flex items-center gap-2 mt-1">
-              <div className="flex items-center gap-1 bg-blue-100 text-[#0071c2] px-2 py-0.5 rounded text-xs font-medium">
-                <Building2 size={11} /> Hotels
-              </div>
               <div className="flex items-center text-yellow-500">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={11} fill="currentColor" />
+                  <Star key={i} size={20} fill="currentColor" />
                 ))}
               </div>
-              <span className="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded">
-                No.1 in Luxury Hotel & Resort
-              </span>
             </div>
 
             {/* Address */}
@@ -70,15 +64,10 @@ function ResortCard({name, address, images, rating, reviews, priceOriginal, pric
 
       {/* Right: Price */}
       <div className="w-[25%] p-4 border-l border-gray-200 flex flex-col justify-center text-right">
-        <p className="text-sm text-gray-400 line-through">
-          {priceOriginal.toLocaleString()} VND
-        </p>
         <p className="text-xl font-semibold text-red-600">
           {priceDiscounted.toLocaleString()} VND
         </p>
-        <p className="text-xs text-red-500 mt-1">
-          Only 1 room left at this price!
-        </p>
+
         <button className="mt-3 bg-blue-500 text-white text-sm font-medium py-1.5 px-3 rounded-md hover:bg-green-700 w-fit ml-auto">
           Select Room
         </button>

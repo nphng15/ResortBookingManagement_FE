@@ -1,10 +1,20 @@
 @import "tailwindcss";
 .addBtn {
-  @apply w-full rounded-lg bg-blue-500 py-3 px-6 font-bold text-white 
-  transition-all duration-200 ease-in-out
-  hover:bg-blue-700 hover:-translate-y-0.5 hover:shadow-md;
+  @apply w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 
+  text-white transition-all duration-300 ease-out inline-flex items-center justify-center
+  hover:from-blue-600 hover:to-blue-700 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/40
+  active:scale-95;
+}
+
+.cartIcon {
+  @apply flex-shrink-0 transition-transform duration-300;
+}
+
+.addBtn:hover .cartIcon {
+  @apply rotate-90;
 }
 
 .disabled {
-  @apply cursor-not-allowed bg-blue-200 shadow-none transform-none hover:translate-y-0 hover:shadow-none;
+  @apply cursor-not-allowed bg-gray-300 from-gray-300 to-gray-300 
+  hover:from-gray-300 hover:to-gray-300 hover:scale-100 hover:shadow-none;
 }

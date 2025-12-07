@@ -38,17 +38,17 @@
 /* --- Định nghĩa chiều rộng cột --- */
 
 .colRoom {
-  @apply w-[45%];
+  @apply w-[80%];
 }
 
 .colGuest {
-  @apply min-w-[100px] w-[15%];
+  @apply min-w-[100px] w-[3%];
 }
 
 .colPrice {
-  @apply min-w-[150px] w-[25%];
+  @apply min-w-[150px] w-[20%];
 }
 
 .colAction {
-  @apply min-w-[120px] w-[15%] align-middle; /* Riêng cột này căn giữa */
+  @apply min-w-[120px] w-[2%] text-center; /* Căn giữa nội dung */
 }

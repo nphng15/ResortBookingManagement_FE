@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, Typography, IconButton } from '@mui/material';
 import { CalendarToday, KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
-import { FileX } from "lucide-react";
 
 type SelectionMode = 'start' | 'end';
 

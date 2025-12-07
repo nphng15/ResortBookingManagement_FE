@@ -34,11 +34,11 @@ function GuestIcon({ guestCount, allowsChildren }: RoomGuestInfoProps) {
         <span className={styles.guestCount}>{guestCount}</span>
       </div>
 
-      {allowsChildren && (
+      {/* {allowsChildren && (
         <div className={styles.childSection}>
           <span className={styles.childIcon}>{ICONS.baby}</span>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

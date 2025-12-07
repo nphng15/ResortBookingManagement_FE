@@ -1,5 +1,5 @@
 import React from "react";
-import UserInfo from "./userinfo";
+import UserInfo from "./UserInfo";
 
 export interface CommentData {
   id: number;

@@ -2,12 +2,12 @@
 
 /* === TOÀN BỘ SECTION PHÒNG === */
 .roomSection {
-  @apply w-full border rounded-2xl overflow-hidden bg-white shadow-sm;
+  @apply my-4 w-full border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-md;
 }
 
 /* === HEADER: NẰM TRÊN CÙNG, TRÀN FULL === */
 .roomHeader {
-  @apply w-full px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 font-semibold text-gray-800 text-lg;
+  @apply w-full px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 font-bold text-gray-800 text-2xl;
 }
 
 /* === NỘI DUNG: ẢNH + BẢNG GÓI === */
@@ -27,7 +27,7 @@
 
 /* === LINK XEM CHI TIẾT === */
 .detailLink {
-  @apply text-sky-600 underline cursor-pointer text-sm font-medium hover:text-sky-700 transition-colors;
+  @apply text-sky-600 underline cursor-pointer text-base font-medium hover:text-sky-700 transition-colors;
 }
 
 /* === BẢNG GÓI PHÒNG === */
@@ -44,15 +44,15 @@
 }
 
 .packageCol_option_title {
-  @apply font-medium text-gray-900;
+  @apply font-medium text-gray-900 text-lg;
 }
 
 .packageCol_option_desc {
-  @apply text-xs text-gray-600 space-y-0.5;
+  @apply text-sm text-gray-600 space-y-0.5;
 }
 
 .packageCol_guest {
-  @apply col-span-2 flex items-center justify-center gap-1 text-sm font-medium text-gray-700;
+  @apply col-span-2 flex items-center justify-center gap-1 text-base font-medium text-gray-700;
 }
 
 .packageCol_price {
@@ -60,15 +60,15 @@
 }
 
 .packageCol_price_current {
-  @apply text-lg font-bold text-red-600;
+  @apply text-2xl font-bold text-red-600;
 }
 
 .packageCol_price_original {
-  @apply line-through text-sm text-gray-400;
+  @apply line-through text-base text-gray-400;
 }
 
 .packageCol_price_note {
-  @apply text-xs text-gray-500;
+  @apply text-sm text-gray-500;
 }
 
 .packageCol_action {
@@ -76,5 +76,5 @@
 }
 
 .selectButton {
-  @apply px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap min-w-20 text-center;
+  @apply px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap min-w-20 text-center;
 }

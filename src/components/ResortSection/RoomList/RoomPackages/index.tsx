@@ -91,17 +91,15 @@ function RoomPackages() {
                 <GuestIcon {...pkg.guestData} />
               </td>
 
-              {/* Cột 3: Giá (Để trống theo yêu cầu) */}
+              {/* Cột 3: Giá */}
               <td className={styles.colPrice}>
-                <Price {...pkg.priceData} />
-                {/* (Tạm thời để trống như bạn yêu cầu) */}
+                <Price price={pkg.priceData.discounted} />
               </td>
 
               {/* Cột 4: Nút Add */}
               <td className={styles.colAction}>
                 <AddBtn 
                   onClick={() => handleSelect(pkg.id)}
-                  text="Chọn"
                 />
               </td>
             </tr>
