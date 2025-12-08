@@ -1,14 +1,12 @@
 import { Outlet, NavLink, useLocation } from 'react-router';
-import { UsersIcon, BuildingOffice2Icon, ClipboardDocumentCheckIcon, BanknotesIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { CalendarDaysIcon, ChartBarIcon, ArrowRightOnRectangleIcon, HomeIcon } from '@heroicons/react/24/outline';
 
 const navItems = [
-  { path: '/admin/customers', label: 'Khách hàng', icon: UsersIcon },
-  { path: '/admin/partners', label: 'Đối tác', icon: BuildingOffice2Icon },
-  { path: '/admin/partner-approval', label: 'Phê duyệt đối tác', icon: ClipboardDocumentCheckIcon },
-  { path: '/admin/withdrawals', label: 'Yêu cầu rút tiền', icon: BanknotesIcon },
+  { path: '/partner/bookings', label: 'Quản lý đặt phòng', icon: CalendarDaysIcon },
+  { path: '/partner/revenue', label: 'Quản lý doanh thu', icon: ChartBarIcon },
 ];
 
-export default function AdminLayout() {
+export default function PartnerLayout() {
   const location = useLocation();
 
   return (
@@ -18,10 +16,10 @@ export default function AdminLayout() {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+              <HomeIcon className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-gray-900">Admin Panel</span>
+            <span className="font-semibold text-gray-900">Partner Portal</span>
           </div>
         </div>
 
@@ -35,7 +33,7 @@ export default function AdminLayout() {
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   isActive
-                    ? 'bg-blue-50 text-blue-600'
+                    ? 'bg-emerald-50 text-emerald-600'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >
@@ -48,10 +46,10 @@ export default function AdminLayout() {
 
         {/* Footer */}
         <div className="p-3 border-t border-gray-100">
-          <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 w-full transition-colors cursor-pointer">
-            <Cog6ToothIcon className="w-5 h-5" />
-            Cài đặt
-          </button>
+          <div className="px-3 py-2 mb-2">
+            <p className="text-xs text-gray-500">Đối tác</p>
+            <p className="text-sm font-medium text-gray-900">Resort ABC</p>
+          </div>
           <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 w-full transition-colors cursor-pointer">
             <ArrowRightOnRectangleIcon className="w-5 h-5" />
             Đăng xuất
@@ -68,10 +66,10 @@ export default function AdminLayout() {
           </h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600">AD</span>
+              <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-emerald-600">P</span>
               </div>
-              <span className="text-sm font-medium text-gray-700">Admin</span>
+              <span className="text-sm font-medium text-gray-700">Partner</span>
             </div>
           </div>
         </header>
