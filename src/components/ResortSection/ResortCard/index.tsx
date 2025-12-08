@@ -12,12 +12,10 @@ interface ResortCardProps {
   address: string;
   images: string[];
   rating: number;
-  reviews: string;
-  priceOriginal: number;
   priceDiscounted: number;
 }
 
-function ResortCard({name, address, images, rating, reviews, priceOriginal, priceDiscounted}: ResortCardProps) {
+function ResortCard({name, address, images, rating, priceDiscounted}: ResortCardProps) {
   return (
     <div className="flex justify-between gap-5 p-4 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition bg-white w-full max-w-[1000px]">
       {/* Left: Image */}
