@@ -14,8 +14,8 @@ function AppRoutes() {
       <Routes>
         {/* Public Routes */}
         <Route element={<DefaultLayout />}>
-          {/* <Route path="/" element={<HomePage />} /> */}
-          <Route path="/" element={<ResortList/>} />
+          <Route path="/" element={<HomePage />} />
+          {/* <Route path="/" element={<ResortList/>} /> */}
           {/* <Route path="/" element={<ResortDetail/>} /> */}
         </Route>
 

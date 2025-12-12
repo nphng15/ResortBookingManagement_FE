@@ -6,19 +6,31 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import SearchIcon from '@mui/icons-material/Search'
 import DateRangePicker from './DateRangePicker'
-import GuestRoomPicker from './GuestRoomPicker'
+import GuestPicker from './GuestPicker'
 import { useState } from 'react'
 
 function Form() {
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
     const [guests, setGuests] = useState(2);
-    const [rooms, setRooms] = useState(1);
     const [destination, setDestination] = useState('');
 // TODO: cần tối ưu state destination -> đợi user ngừng nhập thì mới update state
 
+    const formatDate = (date: Date | null): string => {
+        if (!date) return '';
+        return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    };
+
     const handleSearch = () => {
-        console.log(`${destination} ${selectedStartDate} ${selectedEndDate} ${guests} ${rooms}`);
+        const params = new URLSearchParams({
+            name: destination,
+            checkin: formatDate(selectedStartDate),
+            checkout: formatDate(selectedEndDate),
+            number: guests.toString(),
+        });
+        
+        // Open in new tab
+        window.open(`/search?${params.toString()}`, '_blank');
     }
     return (
     <Container sx={{ px: '0 !important', py: '10rem'}}>
@@ -80,11 +92,9 @@ function Form() {
                     />
                 </Grid>
                 <Grid size={{ xs: 12, md: 4 }}>
-                    <GuestRoomPicker 
+                    <GuestPicker 
                         guests={guests}
-                        rooms={rooms}
                         setGuests={setGuests}
-                        setRooms={setRooms}
                     />
                 </Grid>
             </Grid>
