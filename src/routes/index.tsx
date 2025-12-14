@@ -15,8 +15,8 @@ function AppRoutes() {
         {/* Public Routes */}
         <Route element={<DefaultLayout />}>
           <Route path="/" element={<HomePage />} />
-          {/* <Route path="/" element={<ResortList/>} /> */}
-          {/* <Route path="/" element={<ResortDetail/>} /> */}
+          <Route path="/search" element={<ResortList />} />
+          <Route path="/resort/:id" element={<ResortDetail />} />
         </Route>
 
         {/* Admin Routes */}

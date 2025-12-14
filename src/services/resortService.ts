@@ -25,11 +25,17 @@ export const searchResorts = async (params: SearchParams): Promise<Resort[]> => 
     number: params.number.toString(),
   }).toString();
 
-  const response = await fetch(`${API_BASE_URL}/search?${queryString}`);
+  const url = `${API_BASE_URL}/search?${queryString}`;
+  console.log('Fetching:', url);
+
+  const response = await fetch(url);
+  console.log('Response status:', response.status);
   
   if (!response.ok) {
     throw new Error('Failed to search resorts');
   }
   
-  return response.json();
+  const data = await response.json();
+  console.log('Data:', data);
+  return data;
 };

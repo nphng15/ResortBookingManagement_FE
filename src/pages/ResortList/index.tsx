@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import Container from '@mui/material/Container';
 import ResortCard from '../../components/ResortSection/ResortCard';
+import ResortCardSkeleton from '../../components/ResortSection/ResortCard/ResortCardSkeleton';
 import ResortFilter from '../../components/ResortSection/Filter';
 import SearchBar from '../../components/ResortSection/SearchBar';
 import { searchResorts, type Resort } from '../../services/resortService';
-import Spinner from '../../components/shared/Spinner';
 
 function ResortList() {
   const [searchParams] = useSearchParams();
@@ -54,8 +54,10 @@ function ResortList() {
           {/* Resort Cards - Right */}
           <div className="flex-1 flex flex-col gap-4">
             {loading && (
-              <div className="flex justify-center py-8">
-                <Spinner />
+              <div className="flex flex-col gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <ResortCardSkeleton key={i} />
+                ))}
               </div>
             )}
             

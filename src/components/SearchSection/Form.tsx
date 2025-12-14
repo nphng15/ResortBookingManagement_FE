@@ -7,14 +7,15 @@ import Typography from '@mui/material/Typography'
 import SearchIcon from '@mui/icons-material/Search'
 import DateRangePicker from './DateRangePicker'
 import GuestPicker from './GuestPicker'
-import { useState } from 'react'
+import { useState, useDeferredValue } from 'react'
 
 function Form() {
     const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
     const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
     const [guests, setGuests] = useState(2);
     const [destination, setDestination] = useState('');
-// TODO: cần tối ưu state destination -> đợi user ngừng nhập thì mới update state
+    // Sử dụng useDeferredValue để tránh blocking UI khi user nhập nhanh
+    const deferredDestination = useDeferredValue(destination);
 
     const formatDate = (date: Date | null): string => {
         if (!date) return '';
@@ -23,7 +24,7 @@ function Form() {
 
     const handleSearch = () => {
         const params = new URLSearchParams({
-            name: destination,
+            name: deferredDestination,
             checkin: formatDate(selectedStartDate),
             checkout: formatDate(selectedEndDate),
             number: guests.toString(),
