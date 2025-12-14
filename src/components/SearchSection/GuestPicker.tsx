@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
-import { People, Add, Remove } from '@mui/icons-material';
 
 interface GuestPickerProps {
   guests: number;
@@ -17,100 +15,54 @@ export default function GuestPicker({ guests, setGuests }: GuestPickerProps) {
         setIsOpen(false);
       }
     };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const handleGuestsChange = (delta: number) => {
-    setGuests(guests + delta);
-  };
-
   return (
-    <Box sx={{ position: 'relative' }} ref={pickerRef}>
-      <Typography variant="body2" sx={{ fontSize: '1rem', mb: 1, color: 'text.secondary', fontWeight: 500 }}>
-        Số khách
-      </Typography>
+    <div className="relative" ref={pickerRef}>
+      <label className="block text-sm font-semibold text-slate-700 mb-2">Số khách</label>
       
-      <Box
+      <div
         onClick={() => setIsOpen(!isOpen)}
-        sx={{
-          p: 2,
-          border: 2,
-          borderColor: isOpen ? '#0064D2' : '#E0E0E0',
-          borderRadius: 2,
-          cursor: 'pointer',
-          backgroundColor: 'white',
-          transition: 'all 0.2s',
-          '&:hover': {
-            borderColor: '#0064D2',
-            boxShadow: '0 2px 8px rgba(0,100,210,0.1)'
-          }
-        }}
+        className={`flex items-center gap-3 px-4 py-4 bg-slate-50 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+          isOpen ? 'border-violet-500 bg-white' : 'border-slate-200 hover:border-violet-400'
+        }`}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <People sx={{ fontSize: 20, color: '#666' }} />
-          <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#000' }}>
-            {guests} người
-          </Typography>
-        </Box>
-      </Box>
+        <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <span className="text-slate-900 font-semibold">{guests} người</span>
+        <svg className={`w-4 h-4 text-slate-400 ml-auto transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
 
       {isOpen && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            mt: 1,
-            backgroundColor: 'white',
-            border: 1,
-            borderColor: '#E0E0E0',
-            borderRadius: 2,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            zIndex: 1000,
-            p: 3
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <IconButton
-              onClick={() => handleGuestsChange(-1)}
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => guests > 1 && setGuests(guests - 1)}
               disabled={guests <= 1}
-              sx={{
-                border: 1,
-                borderColor: '#E0E0E0',
-                '&:hover': { borderColor: '#0064D2', backgroundColor: '#F5F5F5' },
-                '&.Mui-disabled': { borderColor: '#F0F0F0' }
-              }}
+              className="w-10 h-10 flex items-center justify-center rounded-full border-2 border-slate-200 text-slate-600 hover:border-violet-500 hover:text-violet-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
-              <Remove sx={{ fontSize: 20 }} />
-            </IconButton>
-            
-            <Typography sx={{ fontSize: '1.25rem', fontWeight: 600, minWidth: 40, textAlign: 'center' }}>
-              {guests}
-            </Typography>
-            
-            <IconButton
-              onClick={() => handleGuestsChange(1)}
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
+              </svg>
+            </button>
+            <span className="text-2xl font-bold text-slate-900 min-w-[60px] text-center">{guests}</span>
+            <button
+              onClick={() => guests < 10 && setGuests(guests + 1)}
               disabled={guests >= 10}
-              sx={{
-                border: 1,
-                borderColor: '#E0E0E0',
-                '&:hover': { borderColor: '#0064D2', backgroundColor: '#F5F5F5' },
-                '&.Mui-disabled': { borderColor: '#F0F0F0' }
-              }}
+              className="w-10 h-10 flex items-center justify-center rounded-full border-2 border-slate-200 text-slate-600 hover:border-violet-500 hover:text-violet-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
-              <Add sx={{ fontSize: 20 }} />
-            </IconButton>
-          </Box>
-        </Box>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }

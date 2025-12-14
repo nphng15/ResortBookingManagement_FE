@@ -1,141 +1,87 @@
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Container from '@mui/material/Container'
-import Grid from '@mui/material/Grid'
-import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
-import SearchIcon from '@mui/icons-material/Search'
 import DateRangePicker from './DateRangePicker'
 import GuestPicker from './GuestPicker'
 import { useState, useDeferredValue } from 'react'
 
 function Form() {
-    const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
-    const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
-    const [guests, setGuests] = useState(2);
-    const [destination, setDestination] = useState('');
-    // Sử dụng useDeferredValue để tránh blocking UI khi user nhập nhanh
-    const deferredDestination = useDeferredValue(destination);
+  const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+  const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+  const [guests, setGuests] = useState(2);
+  const [destination, setDestination] = useState('');
+  const deferredDestination = useDeferredValue(destination);
 
-    const formatDate = (date: Date | null): string => {
-        if (!date) return '';
-        return date.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    };
+  const formatDate = (date: Date | null): string => {
+    if (!date) return '';
+    return date.toISOString().split('T')[0];
+  };
 
-    const handleSearch = () => {
-        const params = new URLSearchParams({
-            name: deferredDestination,
-            checkin: formatDate(selectedStartDate),
-            checkout: formatDate(selectedEndDate),
-            number: guests.toString(),
-        });
-        
-        // Open in new tab
-        window.open(`/search?${params.toString()}`, '_blank');
-    }
-    return (
-    <Container sx={{ px: '0 !important', py: '10rem'}}>
-        {/* Header */}
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
-            <Typography 
-                variant="h4" 
-                component="h1" 
-                sx={{ 
-                    fontWeight: 600, 
-                    color: 'white',
-                    mb: 1,
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                }}
+  const handleSearch = () => {
+    const params = new URLSearchParams({
+      name: deferredDestination,
+      checkin: formatDate(selectedStartDate),
+      checkout: formatDate(selectedEndDate),
+      number: guests.toString(),
+    });
+    window.open(`/search?${params.toString()}`, '_blank');
+  }
+
+  return (
+    <div className="relative">
+      {/* Glow effect */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-cyan-500 to-pink-500 rounded-3xl blur-lg opacity-30" />
+      
+      {/* Form Card */}
+      <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-2xl border border-white/50">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+          
+          {/* Destination Input */}
+          <div className="lg:col-span-5">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Điểm đến
+            </label>
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={destination}
+                onChange={(e) => setDestination(e.target.value)}
+                placeholder="Tìm kiếm resort, địa điểm..."
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white transition-all duration-200"
+              />
+            </div>
+          </div>
+
+          {/* Guest Picker */}
+          <div className="lg:col-span-3">
+            <GuestPicker guests={guests} setGuests={setGuests} />
+          </div>
+
+          {/* Search Button */}
+          <div className="lg:col-span-4 flex items-end">
+            <button
+              onClick={handleSearch}
+              className="w-full py-4 px-6 bg-gradient-to-r from-violet-600 to-cyan-600 text-white rounded-xl font-bold text-lg hover:from-violet-700 hover:to-cyan-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2 group"
             >
-                Tìm Kiếm Resort Hoàn Hảo
-            </Typography>
-            <Typography 
-                variant="subtitle1" 
-                sx={{ 
-                    color: 'rgba(255,255,255,0.9)',
-                    mb: 3,
-                    textShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                }}
-            >
-                Khám phá những kỳ nghỉ tuyệt vời tại các resort hàng đầu
-            </Typography>
-        </Box>
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Tìm Kiếm
+            </button>
+          </div>
+        </div>
 
-        {/* Search Form */}
-        <Box sx={{ 
-            p: 3, 
-            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-            borderRadius: 3,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-            backdropFilter: 'blur(10px)'
-        }}>
-            <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 8 }} sx={{ mb: 3}}>
-                    <Typography variant="body2" sx={{ fontSize:'1rem', mb: 1, color: 'text.secondary', fontWeight: 500 }}>
-                        Điểm đến
-                    </Typography>
-                    <TextField
-                        fullWidth 
-                        placeholder="Tìm kiếm resort, khách sạn..."
-                        value={destination}
-                        onChange={(e) => setDestination(e.target.value)}
-                        InputProps={{
-                            startAdornment: <SearchIcon sx={{ mr: 1, color: 'grey.400' }} />
-                        }}
-                        sx={{ 
-                            '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                '&:hover fieldset': {
-                                    borderColor: 'primary.main'
-                                }
-                            }
-                        }}
-                    />
-                </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
-                    <GuestPicker 
-                        guests={guests}
-                        setGuests={setGuests}
-                    />
-                </Grid>
-            </Grid>
-
-            <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 8 }}>
-                    <DateRangePicker 
-                        selectedStartDate={selectedStartDate}
-                        selectedEndDate={selectedEndDate}
-                        setSelectedStartDate={setSelectedStartDate}
-                        setSelectedEndDate={setSelectedEndDate}
-                    />
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Button 
-                        onClick={handleSearch}
-                        fullWidth 
-                        variant="contained" 
-                        size="large"
-                        sx={{
-                            borderRadius: 2,
-                            py: 1.75,
-                            fontSize: '1.1rem',
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            boxShadow: '0 4px 12px rgba(25,118,210,0.3)',
-                            '&:hover': {
-                                boxShadow: '0 6px 20px rgba(25,118,210,0.4)',
-                                transform: 'translateY(-2px)'
-                            },
-                            transition: 'all 0.3s ease'
-                        }}
-                    >
-                        Tìm Kiếm
-                    </Button>
-                </Grid>
-            </Grid>
-        </Box>
-    </Container>
+        {/* Date Range Picker - Full Width */}
+        <div className="mt-6">
+          <DateRangePicker
+            selectedStartDate={selectedStartDate}
+            selectedEndDate={selectedEndDate}
+            setSelectedStartDate={setSelectedStartDate}
+            setSelectedEndDate={setSelectedEndDate}
+          />
+        </div>
+      </div>
+    </div>
   )
 }
 

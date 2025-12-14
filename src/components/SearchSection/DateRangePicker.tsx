@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Box, Typography, IconButton } from '@mui/material';
-import { CalendarToday, KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 
 type SelectionMode = 'start' | 'end';
 
-interface DateProps{
+interface DateProps {
   selectedStartDate: Date | null;
   selectedEndDate: Date | null;
   setSelectedStartDate: (value: Date | null) => void;
@@ -12,19 +10,14 @@ interface DateProps{
 }
 
 export default function DateRangePicker({
-  selectedStartDate,
-  selectedEndDate,
-  setSelectedStartDate,
-  setSelectedEndDate
-} : DateProps) {
+  selectedStartDate, selectedEndDate, setSelectedStartDate, setSelectedEndDate
+}: DateProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isOpen, setIsOpen] = useState(false);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('start');
   const [activeInput, setActiveInput] = useState<SelectionMode | null>(null);
-
   const datepickerRef = useRef<HTMLDivElement>(null);
 
-  // Close calendar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (datepickerRef.current && !datepickerRef.current.contains(event.target as Node)) {
@@ -32,102 +25,19 @@ export default function DateRangePicker({
         setActiveInput(null);
       }
     };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return '';
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-
   const formatDisplayDate = (date: Date | null) => {
-    if (!date) return '';
-    const days = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
-    return `${days[date.getDay()]}, ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+    if (!date) return 'Chọn ngày';
+    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    return `${days[date.getDay()]}, ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
 
-  const renderCalendar = (monthOffset: number) => {
-    const displayMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthOffset, 1);
-    const year = displayMonth.getFullYear();
-    const month = displayMonth.getMonth();
-
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const daysArray = [];
-
-    // Empty cells for days before month starts
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      daysArray.push(<Box key={`empty-${i}`} sx={{ width: 40, height: 40 }}></Box>);
-    }
-
-    // Actual days
-    for (let i = 1; i <= daysInMonth; i++) {
-      const day = new Date(year, month, i);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const isToday = day.toDateString() === today.toDateString();
-      const isPast = day < today;
-      const isStartDate = selectedStartDate && day.toDateString() === selectedStartDate.toDateString();
-      const isEndDate = selectedEndDate && day.toDateString() === selectedEndDate.toDateString();
-      const isInRange = selectedStartDate && selectedEndDate && 
-                        day > selectedStartDate && day < selectedEndDate;
-
-      daysArray.push(
-        <Box
-          key={i}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: isPast ? 'not-allowed' : 'pointer',
-            width: 40,
-            height: 40,
-            borderRadius: (isStartDate || isEndDate) ? '8px' : '0',
-            backgroundColor: (isStartDate || isEndDate) ? '#0064D2' : 
-                           isInRange ? '#E3F2FD' : 
-                           'transparent',
-            color: (isStartDate || isEndDate) ? 'white' : 
-                   isPast ? '#ccc' : 
-                   isToday ? '#0064D2' : 
-                   '#000',
-            fontWeight: (isStartDate || isEndDate || isToday) ? 600 : 400,
-            fontSize: '0.875rem',
-            opacity: 1,
-            position: 'relative',
-            '&:hover': {
-              backgroundColor: isPast ? 'transparent' : 
-                             (isStartDate || isEndDate) ? '#0052A3' : 
-                             '#F5F5F5'
-            },
-            '&::after': isToday && !isStartDate && !isEndDate ? {
-              content: '""',
-              position: 'absolute',
-              bottom: 4,
-              width: 4,
-              height: 4,
-              borderRadius: '50%',
-              backgroundColor: '#0064D2'
-            } : {}
-          }}
-          onClick={() => !isPast && handleDayClick(day)}
-        >
-          {i}
-        </Box>
-      );
-    }
-
-    return daysArray;
+  const getNights = () => {
+    if (!selectedStartDate || !selectedEndDate) return null;
+    return Math.ceil((selectedEndDate.getTime() - selectedStartDate.getTime()) / (1000 * 60 * 60 * 24));
   };
 
   const handleDayClick = (selectedDay: Date) => {
@@ -138,214 +48,168 @@ export default function DateRangePicker({
       setActiveInput('end');
     } else {
       if (selectedStartDate && selectedDay < selectedStartDate) {
-        // If end date is before start date, swap them
         setSelectedEndDate(selectedStartDate);
         setSelectedStartDate(selectedDay);
       } else {
-        if (selectedStartDate?.toDateString() === selectedDay.toDateString()){return;}
+        if (selectedStartDate?.toDateString() === selectedDay.toDateString()) return;
         setSelectedEndDate(selectedDay);
       }
       setSelectionMode('start');
-        setIsOpen(false);
-        setActiveInput(null);
+      setIsOpen(false);
+      setActiveInput(null);
     }
   };
 
-  const handleStartDateClick = () => {
-    setIsOpen(true);
-    setActiveInput('start');
-    setSelectionMode('start');
-  };
+  const renderCalendar = (monthOffset: number) => {
+    const displayMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthOffset, 1);
+    const year = displayMonth.getFullYear();
+    const month = displayMonth.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysArray = [];
+    const today = new Date(); today.setHours(0, 0, 0, 0);
 
-  const handleEndDateClick = () => {
-    setIsOpen(true);
-    setActiveInput('end');
-    setSelectionMode('end');
-  };
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      daysArray.push(<div key={`empty-${i}`} className="w-10 h-10" />);
+    }
 
-  const goToPreviousMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
-  };
+    for (let i = 1; i <= daysInMonth; i++) {
+      const day = new Date(year, month, i);
+      const isToday = day.toDateString() === today.toDateString();
+      const isPast = day < today;
+      const isStartDate = selectedStartDate && day.toDateString() === selectedStartDate.toDateString();
+      const isEndDate = selectedEndDate && day.toDateString() === selectedEndDate.toDateString();
+      const isInRange = selectedStartDate && selectedEndDate && day > selectedStartDate && day < selectedEndDate;
 
-  const goToNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+      daysArray.push(
+        <button
+          key={i}
+          onClick={() => !isPast && handleDayClick(day)}
+          disabled={isPast}
+          className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all cursor-pointer
+            ${isPast ? 'text-slate-300 cursor-not-allowed' : 'hover:bg-violet-100'}
+            ${isStartDate || isEndDate ? 'bg-violet-600 text-white hover:bg-violet-700' : ''}
+            ${isInRange ? 'bg-violet-100 text-violet-700' : ''}
+            ${isToday && !isStartDate && !isEndDate ? 'text-violet-600 font-bold ring-2 ring-violet-200' : ''}
+            ${!isPast && !isStartDate && !isEndDate && !isInRange && !isToday ? 'text-slate-700' : ''}
+          `}
+        >
+          {i}
+        </button>
+      );
+    }
+    return daysArray;
   };
 
   const getMonthName = (monthOffset: number) => {
     const displayMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthOffset, 1);
-    const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-                   'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+    const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
     return `${months[displayMonth.getMonth()]} ${displayMonth.getFullYear()}`;
   };
 
   return (
-    <Box sx={{ position: 'relative' }} ref={datepickerRef}>
-      {/* Date Input Fields */}
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        {/* Check-in Date */}
-        <Box 
-          onClick={handleStartDateClick}
-          sx={{
-            flex: 1,
-            p: 2,
-            py: 2,
-            border: 2,
-            borderColor: activeInput === 'start' ? '#0064D2' : '#E0E0E0',
-            borderRadius: 2,
-            cursor: 'pointer',
-            backgroundColor: 'white',
-            transition: 'all 0.2s',
-            '&:hover': {
-              borderColor: '#0064D2',
-              boxShadow: '0 2px 8px rgba(0,100,210,0.1)'
-            }
-          }}
+    <div className="relative" ref={datepickerRef}>
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Check-in */}
+        <div
+          onClick={() => { setIsOpen(true); setActiveInput('start'); setSelectionMode('start'); }}
+          className={`flex-1 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+            activeInput === 'start' ? 'border-violet-500 bg-violet-50' : 'border-slate-200 bg-slate-50 hover:border-violet-400'
+          }`}
         >
-          <Box sx={{ minHeight: '1.5rem',display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <CalendarToday sx={{ fontSize: 18, color: '#666' }} />
-            <Typography sx={{ fontSize: '1rem', color: '#666', fontWeight: 500 }}>
-              Ngày nhận phòng
-            </Typography>
-          </Box>
-          <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: selectedStartDate ? '#000' : '#999' }}>
-            {selectedStartDate ? formatDisplayDate(selectedStartDate) : 'Chọn ngày'}
-          </Typography>
-        </Box>
+          <div className="flex items-center gap-2 mb-1">
+            <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-sm font-medium text-slate-500">Nhận phòng</span>
+          </div>
+          <p className={`text-lg font-semibold ${selectedStartDate ? 'text-slate-900' : 'text-slate-400'}`}>
+            {formatDisplayDate(selectedStartDate)}
+          </p>
+        </div>
 
         {/* Nights indicator */}
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center', 
-          justifyContent: 'center',
-          minWidth: 60,
-          py: 2
-        }}>
-          <Typography sx={{ fontSize: '1rem', color: '#666', mb: 0.5 }}>
-            {selectedStartDate && selectedEndDate ? 
-              `${Math.ceil((selectedEndDate.getTime() - selectedStartDate.getTime()) / (1000 * 60 * 60 * 24))} đêm` 
-              : ''}
-          </Typography>
-          <Box sx={{ 
-            width: 40, 
-            height: 2, 
-            backgroundColor: '#E0E0E0',
-            position: 'relative',
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              right: -3,
-              top: -3,
-              width: 8,
-              height: 8,
-              borderTop: '2px solid #E0E0E0',
-              borderRight: '2px solid #E0E0E0',
-              transform: 'rotate(45deg)'
-            }
-          }} />
-        </Box>
+        {getNights() && (
+          <div className="hidden sm:flex items-center justify-center px-4">
+            <div className="text-center">
+              <p className="text-sm font-bold text-violet-600">{getNights()} đêm</p>
+              <div className="w-8 h-0.5 bg-slate-300 mt-1" />
+            </div>
+          </div>
+        )}
 
-        {/* Check-out Date */}
-        <Box 
-          onClick={handleEndDateClick}
-          sx={{
-            flex: 1,
-            p: 2,
-            border: 2,
-            borderColor: activeInput === 'end' ? '#0064D2' : '#E0E0E0',
-            borderRadius: 2,
-            cursor: 'pointer',
-            backgroundColor: 'white',
-            transition: 'all 0.2s',
-            '&:hover': {
-              borderColor: '#0064D2',
-              boxShadow: '0 2px 8px rgba(0,100,210,0.1)'
-            }
-          }}
+        {/* Check-out */}
+        <div
+          onClick={() => { setIsOpen(true); setActiveInput('end'); setSelectionMode('end'); }}
+          className={`flex-1 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+            activeInput === 'end' ? 'border-violet-500 bg-violet-50' : 'border-slate-200 bg-slate-50 hover:border-violet-400'
+          }`}
         >
-          <Box sx={{ minHeight: '1.5rem', display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <CalendarToday sx={{ fontSize: 18, color: '#666' }} />
-            <Typography sx={{ fontSize: '1rem', color: '#666', fontWeight: 500 }}>
-              Ngày trả phòng
-            </Typography>
-          </Box>
-          <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: selectedEndDate ? '#000' : '#999' }}>
-            {selectedEndDate ? formatDisplayDate(selectedEndDate) : 'Chọn ngày'}
-          </Typography>
-        </Box>
-      </Box>
+          <div className="flex items-center gap-2 mb-1">
+            <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-sm font-medium text-slate-500">Trả phòng</span>
+          </div>
+          <p className={`text-lg font-semibold ${selectedEndDate ? 'text-slate-900' : 'text-slate-400'}`}>
+            {formatDisplayDate(selectedEndDate)}
+          </p>
+        </div>
+      </div>
 
       {/* Calendar Popup */}
       {isOpen && (
-        <Box
-          sx={{
-            position: 'absolute',
-            mt: 1,
-            backgroundColor: 'white',
-            border: 1,
-            borderColor: '#E0E0E0',
-            borderRadius: 3,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            zIndex: 1000,
-            p: 3
-          }}
-        >
-          {/* Two months side by side */}
-          <Box sx={{ display: 'flex', gap: 4 }}>
+        <div className="absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 p-6">
+          <div className="flex flex-col lg:flex-row gap-8">
             {[0, 1].map((monthOffset) => (
-              <Box key={monthOffset} sx={{ flex: 1 }}>
+              <div key={monthOffset} className="flex-1">
                 {/* Month Header */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                <div className="flex items-center justify-between mb-4">
                   {monthOffset === 0 && (
-                    <IconButton onClick={goToPreviousMonth} size="small" sx={{ color: '#0064D2' }}>
-                      <KeyboardArrowLeft />
-                    </IconButton>
+                    <button
+                      onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 cursor-pointer"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
                   )}
-                  {monthOffset === 0 && <Box sx={{ width: 40 }} />}
+                  {monthOffset === 0 && <div className="w-8" />}
                   
-                  <Typography sx={{ fontSize: '1.2rem', fontWeight: 600, color: '#000' }}>
-                    {getMonthName(monthOffset)}
-                  </Typography>
+                  <h3 className="text-lg font-bold text-slate-900">{getMonthName(monthOffset)}</h3>
                   
-                  {monthOffset === 1 && <Box sx={{ width: 40 }} />}
+                  {monthOffset === 1 && <div className="w-8" />}
                   {monthOffset === 1 && (
-                    <IconButton onClick={goToNextMonth} size="small" sx={{ color: '#0064D2' }}>
-                      <KeyboardArrowRight />
-                    </IconButton>
+                    <button
+                      onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 cursor-pointer"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   )}
+                </div>
 
-                </Box>
-
-                {/* Days of week header */}
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5, mb: 1 }}>
-                  {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((day) => (
-                    <Box key={day} sx={{ 
-                      textAlign: 'center', 
-                      py: 1, 
-                      fontSize: '1rem', 
-                      fontWeight: 600, 
-                      color: '#666',
-                      width: 40,
-                      height: 30,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
+                {/* Days of week */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day) => (
+                    <div key={day} className="w-10 h-8 flex items-center justify-center text-xs font-semibold text-slate-500">
                       {day}
-                    </Box>
+                    </div>
                   ))}
-                </Box>
+                </div>
 
                 {/* Calendar days */}
-                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5 }}>
+                <div className="grid grid-cols-7 gap-1">
                   {renderCalendar(monthOffset)}
-                </Box>
-              </Box>
+                </div>
+              </div>
             ))}
-          </Box>
-
-        </Box>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
