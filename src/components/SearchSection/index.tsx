@@ -21,7 +21,7 @@ function SearchSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 py-20">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-24 pb-20">
         {/* Header */}
         <div className="text-center mb-10">
           
