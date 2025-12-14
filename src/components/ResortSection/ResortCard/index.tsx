@@ -1,4 +1,4 @@
-import React from 'react'
+import { useNavigate } from 'react-router';
 import CardImagePreview from './CardImagePreview';
 import ResortName from '../components/ResortName';
 import ResortRating from '../components/ResortRating';
@@ -8,6 +8,7 @@ import Price from '../components/Price';
 import { Star, Building2, ThumbsUp } from 'lucide-react'; 
 
 interface ResortCardProps {
+  id: number;
   name: string;
   address: string;
   images: string[];
@@ -17,9 +18,17 @@ interface ResortCardProps {
   priceDiscounted: number;
 }
 
-function ResortCard({name, address, images, rating, reviews, priceOriginal, priceDiscounted}: ResortCardProps) {
+function ResortCard({id, name, address, images, rating, reviews, priceOriginal, priceDiscounted}: ResortCardProps) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/resort/${id}`);
+  };
+
   return (
-    <div className="flex justify-between gap-5 p-4 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition bg-white w-full max-w-[1000px]">
+    <div 
+      onClick={handleCardClick}
+      className="flex justify-between gap-5 p-4 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition bg-white w-full max-w-[1000px] cursor-pointer">
       {/* Left: Image */}
       <CardImagePreview images={images} alt={name}/>
 

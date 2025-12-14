@@ -76,6 +76,7 @@ function ResortList() {
             {!loading && !error && resorts.map((resort) => (
               <ResortCard
                 key={resort.id}
+                id={resort.id}
                 name={resort.name}
                 address={resort.address}
                 images={resort.images}

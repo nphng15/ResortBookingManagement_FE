@@ -1,6 +1,6 @@
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import mainBackground from "../../assets/main_background.jpg" 
+import mainBackground from "../../assets/GoldenBridge.jpg" 
 import Form from './Form'
 import Container from '@mui/material/Container'
 

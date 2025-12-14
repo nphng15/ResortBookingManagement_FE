@@ -7,6 +7,7 @@ import { CustomerManagementPage, PartnerManagementPage, PartnerApprovalPage, Wit
 import { BookingManagementPage, RevenueManagementPage } from "../pages/Partner";
 import ResortList from "../pages/ResortList";
 import ResortDetail from "../pages/ResortDetails";
+import AuthPage from "../pages/Auth";
 
 function AppRoutes() {
   return (
@@ -18,6 +19,9 @@ function AppRoutes() {
           <Route path="/search" element={<ResortList />} />
           <Route path="/resort/:id" element={<ResortDetail />} />
         </Route>
+
+        {/* Auth Routes */}
+        <Route path="/auth" element={<AuthPage />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
