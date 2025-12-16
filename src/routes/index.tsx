@@ -8,6 +8,7 @@ import { BookingManagementPage, RevenueManagementPage } from "../pages/Partner";
 import ResortList from "../pages/ResortList";
 import ResortDetail from "../pages/ResortDetails";
 import AuthPage from "../pages/Auth";
+import CartPage from "../pages/Cart";
 
 function AppRoutes() {
   return (
@@ -18,6 +19,7 @@ function AppRoutes() {
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<ResortList />} />
           <Route path="/resort/:id" element={<ResortDetail />} />
+          <Route path="/cart" element={<CartPage />} />
         </Route>
 
         {/* Auth Routes */}
