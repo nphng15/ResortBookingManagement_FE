@@ -1,82 +1,40 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, useLocation } from 'react-router';
 import { Search, MapPin, Calendar, Users, ChevronDown } from 'lucide-react';
 import SimpleDatePicker from './SimpleDatePicker';
+import { useSearch } from '../../hooks/useSearch';
+
+const LOCATIONS = [
+  'Six Senses Ninh Van Bay',
+  'Vinpearl Resort & Spa Nha Trang Bay',
+  'InterContinental Danang Sun Peninsula Resort',
+  'JW Marriott Phu Quoc Emerald Bay',
+  'Nha Trang',
+  'Da Nang',
+  'Phu Quoc'
+];
 
 function SearchBar() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const routeLocation = useLocation();
-
-  // Lấy giá trị từ URL params, nếu không có thì dùng giá trị mặc định
-  const getInitialLocation = () => searchParams.get('name') || '';
-  const getInitialCheckIn = () => searchParams.get('checkin') 
-    ? new Date(searchParams.get('checkin')!) 
-    : new Date();
-  const getInitialCheckOut = () => searchParams.get('checkout') 
-    ? new Date(searchParams.get('checkout')!) 
-    : new Date(Date.now() + 86400000); // +1 ngày
-  const getInitialGuests = () => parseInt(searchParams.get('number') || '2');
-
-  const [location, setLocation] = useState(getInitialLocation);
-  const [checkIn, setCheckIn] = useState(getInitialCheckIn);
-  const [checkOut, setCheckOut] = useState(getInitialCheckOut);
-  const [guests, setGuests] = useState(getInitialGuests);
-
-  // Sync state với URL params khi URL thay đổi
-  useEffect(() => {
-    setLocation(getInitialLocation());
-    setCheckIn(getInitialCheckIn());
-    setCheckOut(getInitialCheckOut());
-    setGuests(getInitialGuests());
-  }, [searchParams]);
-  
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showGuestsDropdown, setShowGuestsDropdown] = useState(false);
-
-  const locations = [
-    'Six Senses Ninh Van Bay',
-    'Vinpearl Resort & Spa Nha Trang Bay',
-    'InterContinental Danang Sun Peninsula Resort',
-    'JW Marriott Phu Quoc Emerald Bay',
-    'Nha Trang',
-    'Da Nang',
-    'Phu Quoc'
-  ];
-
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (location) params.set('name', location);
-    if (checkIn) params.set('checkin', checkIn.toISOString().split('T')[0]);
-    if (checkOut) params.set('checkout', checkOut.toISOString().split('T')[0]);
-    params.set('number', guests.toString());
-    
-    // Nếu đang ở trang /resorts, dùng setSearchParams để trigger re-fetch
-    if (routeLocation.pathname === '/resorts') {
-      setSearchParams(params);
-    } else {
-      navigate(`/search?${params.toString()}`);
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
-  };
-
-  const getNights = () => {
-    const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const isAnyDropdownOpen = showLocationDropdown || showDatePicker || showGuestsDropdown;
-
-  const closeAllDropdowns = () => {
-    setShowLocationDropdown(false);
-    setShowDatePicker(false);
-    setShowGuestsDropdown(false);
-  };
+  const {
+    location,
+    setLocation,
+    checkIn,
+    setCheckIn,
+    checkOut,
+    setCheckOut,
+    guests,
+    incrementGuests,
+    decrementGuests,
+    showLocationDropdown,
+    showDatePicker,
+    showGuestsDropdown,
+    isAnyDropdownOpen,
+    openLocationDropdown,
+    openDatePicker,
+    openGuestsDropdown,
+    closeAllDropdowns,
+    handleSearch,
+    formatDate,
+    getNights,
+  } = useSearch();
 
   return (
     <>
@@ -93,11 +51,7 @@ function SearchBar() {
             {/* Location */}
             <div 
               className="flex items-center gap-3 px-5 py-4 flex-[4] border-r border-slate-200 relative cursor-pointer hover:bg-slate-50/80 rounded-l-2xl transition-colors"
-              onClick={() => {
-                setShowLocationDropdown(!showLocationDropdown);
-                setShowDatePicker(false);
-                setShowGuestsDropdown(false);
-              }}
+              onClick={() => showLocationDropdown ? closeAllDropdowns() : openLocationDropdown()}
             >
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                 <MapPin size={20} className="text-blue-600" />
@@ -116,14 +70,14 @@ function SearchBar() {
               {showLocationDropdown && (
                 <div className="absolute top-full left-0 mt-3 bg-white border border-slate-200 rounded-2xl shadow-xl w-full z-30 max-h-72 overflow-y-auto">
                   <div className="p-2">
-                    {locations.map((loc) => (
+                    {LOCATIONS.map((loc) => (
                       <div
                         key={loc}
                         className="px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm rounded-xl transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           setLocation(loc);
-                          setShowLocationDropdown(false);
+                          closeAllDropdowns();
                         }}
                       >
                         <div className="flex items-center gap-3">
@@ -142,11 +96,7 @@ function SearchBar() {
             {/* Check-in / Check-out */}
             <div 
               className="flex items-center gap-3 px-5 py-4 flex-[5] border-r border-slate-200 relative cursor-pointer hover:bg-slate-50/80 transition-colors"
-              onClick={() => {
-                setShowDatePicker(!showDatePicker);
-                setShowLocationDropdown(false);
-                setShowGuestsDropdown(false);
-              }}
+              onClick={() => showDatePicker ? closeAllDropdowns() : openDatePicker()}
             >
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                 <Calendar size={20} className="text-blue-600" />
@@ -166,7 +116,7 @@ function SearchBar() {
                     endDate={checkOut}
                     onStartDateChange={setCheckIn}
                     onEndDateChange={setCheckOut}
-                    onClose={() => setShowDatePicker(false)}
+                    onClose={closeAllDropdowns}
                   />
                 </div>
               )}
@@ -175,11 +125,7 @@ function SearchBar() {
             {/* Guests */}
             <div 
               className="flex items-center gap-3 px-5 py-4 flex-[2] border-r border-slate-200 relative cursor-pointer hover:bg-slate-50/80 transition-colors"
-              onClick={() => {
-                setShowGuestsDropdown(!showGuestsDropdown);
-                setShowLocationDropdown(false);
-                setShowDatePicker(false);
-              }}
+              onClick={() => showGuestsDropdown ? closeAllDropdowns() : openGuestsDropdown()}
             >
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                 <Users size={20} className="text-blue-600" />
@@ -202,14 +148,14 @@ function SearchBar() {
                     </div>
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => setGuests(Math.max(1, guests - 1))}
+                        onClick={decrementGuests}
                         className="w-9 h-9 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center text-lg transition-colors"
                       >
                         -
                       </button>
                       <span className="text-lg font-semibold w-6 text-center text-slate-800">{guests}</span>
                       <button
-                        onClick={() => setGuests(guests + 1)}
+                        onClick={incrementGuests}
                         className="w-9 h-9 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center text-lg transition-colors"
                       >
                         +

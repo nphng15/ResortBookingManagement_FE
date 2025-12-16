@@ -1,9 +1,6 @@
-import { useState } from 'react';
-import { register, registerPartner } from '../../services/authService';
+import { useSignupForm } from '../../hooks/useSignupForm';
 import FormInput from './components/FormInput';
 import SocialButtons from './components/SocialButtons';
-
-type AccountType = 'customer' | 'partner';
 
 interface SignupFormProps {
   isActive: boolean;
@@ -11,43 +8,15 @@ interface SignupFormProps {
 }
 
 function SignupForm({ isActive, onSuccess }: SignupFormProps) {
-  const [accountType, setAccountType] = useState<AccountType>('customer');
-  const [form, setForm] = useState({
-    username: '', password: '', confirmPassword: '',
-    name: '', phone_number: '', address: '', banking_number: '', bank: ''
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (form.password !== form.confirmPassword) {
-      setError('Mật khẩu không khớp');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      if (accountType === 'customer') {
-        await register({ username: form.username, password: form.password });
-        onSuccess?.('Đăng ký thành công! Vui lòng đăng nhập.');
-      } else {
-        const { confirmPassword, ...partnerData } = form;
-        await registerPartner(partnerData);
-        onSuccess?.('Đăng ký đối tác thành công! Vui lòng chờ admin duyệt.');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Đăng ký thất bại');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateForm = (field: string, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-  };
+  const {
+    accountType,
+    setAccountType,
+    form,
+    loading,
+    error,
+    updateField,
+    handleSubmit,
+  } = useSignupForm(onSuccess);
 
   return (
     <div
@@ -105,19 +74,19 @@ function SignupForm({ isActive, onSuccess }: SignupFormProps) {
             type="text"
             placeholder="Tên đăng nhập"
             value={form.username}
-            onChange={(v) => updateForm('username', v)}
+            onChange={(v) => updateField('username', v)}
           />
           <FormInput
             type="password"
             placeholder="Mật khẩu"
             value={form.password}
-            onChange={(v) => updateForm('password', v)}
+            onChange={(v) => updateField('password', v)}
           />
           <FormInput
             type="password"
             placeholder="Xác nhận mật khẩu"
             value={form.confirmPassword}
-            onChange={(v) => updateForm('confirmPassword', v)}
+            onChange={(v) => updateField('confirmPassword', v)}
           />
 
           {/* Partner fields */}
@@ -127,31 +96,31 @@ function SignupForm({ isActive, onSuccess }: SignupFormProps) {
                 type="text"
                 placeholder="Tên doanh nghiệp"
                 value={form.name}
-                onChange={(v) => updateForm('name', v)}
+                onChange={(v) => updateField('name', v)}
               />
               <FormInput
                 type="tel"
                 placeholder="Số điện thoại"
                 value={form.phone_number}
-                onChange={(v) => updateForm('phone_number', v)}
+                onChange={(v) => updateField('phone_number', v)}
               />
               <FormInput
                 type="text"
                 placeholder="Địa chỉ"
                 value={form.address}
-                onChange={(v) => updateForm('address', v)}
+                onChange={(v) => updateField('address', v)}
               />
               <FormInput
                 type="text"
                 placeholder="Số tài khoản ngân hàng"
                 value={form.banking_number}
-                onChange={(v) => updateForm('banking_number', v)}
+                onChange={(v) => updateField('banking_number', v)}
               />
               <FormInput
                 type="text"
                 placeholder="Tên ngân hàng"
                 value={form.bank}
-                onChange={(v) => updateForm('bank', v)}
+                onChange={(v) => updateField('bank', v)}
               />
             </>
           )}
