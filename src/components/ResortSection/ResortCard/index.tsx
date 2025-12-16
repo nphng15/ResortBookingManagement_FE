@@ -1,11 +1,6 @@
 import { useNavigate } from 'react-router';
 import CardImagePreview from './CardImagePreview';
-import ResortName from '../components/ResortName';
-import ResortRating from '../components/ResortRating';
-import ResortAddress from '../components/ResortAddress';
-import ServiceTag from './ServiceTag';
-import Price from '../components/Price';
-import { Star, Building2, ThumbsUp } from 'lucide-react'; 
+import { Star, MapPin, Sparkles, BadgeCheck, Heart } from 'lucide-react'; 
 
 interface ResortCardProps {
   id: number;
@@ -25,64 +20,120 @@ function ResortCard({id, name, address, images, rating, reviews, priceOriginal, 
     navigate(`/resort/${id}`);
   };
 
+  const getRatingLabel = (rating: number) => {
+    if (rating >= 9) return 'Xuất sắc';
+    if (rating >= 8) return 'Tuyệt vời';
+    if (rating >= 7) return 'Rất tốt';
+    return 'Tốt';
+  };
+
+  const displayRating = rating || 9.2;
+
   return (
     <div 
       onClick={handleCardClick}
-      className="flex justify-between gap-5 p-4 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition bg-white w-full max-w-[1000px] cursor-pointer">
+      className="group relative flex bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-200 transition-all duration-300 cursor-pointer overflow-hidden"
+    >
       {/* Left: Image */}
-      <CardImagePreview images={images} alt={name}/>
+      <div className="relative w-[280px] flex-shrink-0">
+        <CardImagePreview images={images} alt={name}/>
+        
+        {/* Favorite Button */}
+        <button 
+          onClick={(e) => { e.stopPropagation(); }}
+          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
+        >
+          <Heart size={18} className="text-slate-400 hover:text-red-500 transition-colors" />
+        </button>
 
-      {/* Middle: Info + Rating */}
-      <div className="flex flex-col justify-between flex-[1.8] min-w-[45%]">
-        {/* Header: Resort name + Rating (cùng hàng) */}
-        <div className="flex justify-between items-start">
-          <div>
-            {/* Resort Name */}
-            <ResortName name={name} />
+        {/* Badge */}
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium shadow-lg">
+          <Sparkles size={12} />
+          <span>Được yêu thích</span>
+        </div>
+      </div>
 
-            {/* Hotels + stars + badge */}
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex items-center text-yellow-500">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={20} fill="currentColor" />
-                ))}
+      {/* Middle: Info */}
+      <div className="flex-1 p-5 flex flex-col justify-between min-w-0">
+        <div>
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              {/* Resort Name */}
+              <h3 className="text-lg font-semibold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">
+                {name}
+              </h3>
+
+              {/* Stars */}
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={14} className="text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+                <span className="text-xs text-slate-400">Resort</span>
+              </div>
+
+              {/* Address */}
+              <div className="flex items-center gap-1.5 mt-2 text-slate-500">
+                <MapPin size={14} className="flex-shrink-0" />
+                <span className="text-sm line-clamp-1">{address}</span>
               </div>
             </div>
 
-            {/* Address */}
-            <ResortAddress address={address} />
-
-            {/* Tags: same line */}
-            <div className="flex gap-2 mt-2 flex-nowrap overflow-x-auto">
-              <ServiceTag label="Free Cancellation" color="bg-green-100 text-green-700" />
-              <ServiceTag label="Coupons up to 200K" color="bg-blue-50 text-blue-700" />
+            {/* Rating */}
+            <div className="flex flex-col items-end flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="text-right">
+                  <p className="text-xs text-slate-500">{getRatingLabel(displayRating)}</p>
+                  <p className="text-xs text-slate-400">1.2K đánh giá</p>
+                </div>
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/25">
+                  {displayRating.toFixed(1)}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Rating moved here */}
-          <div className="flex flex-col items-end text-right text-gray-700 text-sm leading-tight">
-            <div className="flex items-baseline space-x-1">
-              <span className="text-blue-600 font-semibold text-lg leading-none">9.2</span>
-              <span className="text-gray-500 text-sm leading-none">(1.2K reviews)</span>
-            </div>
-            <span className="text-gray-700 text-sm mt-0.5">Exceptional</span>
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-medium">
+              <BadgeCheck size={12} />
+              Miễn phí hủy phòng
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-medium">
+              <Sparkles size={12} />
+              Giảm đến 200K
+            </span>
           </div>
-
         </div>
       </div>
 
       {/* Right: Price */}
-      <div className="w-[25%] p-4 border-l border-gray-200 flex flex-col justify-center text-right">
-        <p className="text-xl font-semibold text-red-600">
-          {priceDiscounted.toLocaleString()} VND
-        </p>
+      <div className="w-[200px] p-5 bg-gradient-to-br from-slate-50 to-blue-50/50 border-l border-slate-100 flex flex-col justify-center">
+        <div className="text-right">
+          <p className="text-xs text-slate-500 mb-1">Giá mỗi đêm từ</p>
+          {priceOriginal > priceDiscounted && (
+            <p className="text-sm text-slate-400 line-through">
+              {priceOriginal.toLocaleString('vi-VN')}đ
+            </p>
+          )}
+          <p className="text-2xl font-bold text-slate-800">
+            {priceDiscounted.toLocaleString('vi-VN')}
+            <span className="text-sm font-normal text-slate-500">đ</span>
+          </p>
+          <p className="text-xs text-slate-400 mt-0.5">Đã bao gồm thuế & phí</p>
+        </div>
 
-        <button className="mt-3 bg-blue-500 text-white text-sm font-medium py-1.5 px-3 rounded-md hover:bg-green-700 w-fit ml-auto">
-          Select Room
+        <button 
+          onClick={(e) => { e.stopPropagation(); navigate(`/resort/${id}`); }}
+          className="mt-4 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200"
+        >
+          Chọn phòng
         </button>
       </div>
     </div>
   );
-};
+}
 
 export default ResortCard

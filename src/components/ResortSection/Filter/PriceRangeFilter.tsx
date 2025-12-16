@@ -8,12 +8,6 @@ function PriceRangeFilter({ onPriceChange }: PriceRangeFilterProps) {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(24000000);
 
-  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value);
-    setMinPrice(value);
-    onPriceChange?.(value, maxPrice);
-  };
-
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     setMaxPrice(value);
@@ -27,52 +21,41 @@ function PriceRangeFilter({ onPriceChange }: PriceRangeFilterProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg p-4 mb-4">
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h3 className="font-bold text-gray-900 text-lg">Price Range</h3>
-          <p className="text-sm text-gray-500">Per room, per night</p>
-        </div>
+    <div className="p-4 border-b border-slate-100">
+      <div className="flex items-center justify-between mb-1">
+        <h4 className="font-medium text-slate-800">Khoảng giá</h4>
         <button 
           onClick={handleReset}
-          className="text-blue-500 text-sm font-medium hover:text-blue-600"
+          className="text-blue-600 text-xs font-medium hover:text-blue-700 transition-colors"
         >
-          Reset
+          Đặt lại
         </button>
       </div>
+      <p className="text-xs text-slate-500 mb-4">Mỗi phòng, mỗi đêm</p>
 
-      <div className="mt-6 mb-4">
-        <div className="relative">
-          <input
-            type="range"
-            min="0"
-            max="24000000"
-            step="100000"
-            value={maxPrice}
-            onChange={handleMaxChange}
-            className="w-full h-2 bg-blue-500 rounded-lg appearance-none cursor-pointer accent-blue-500"
-          />
-        </div>
+      <div className="mb-4">
+        <input
+          type="range"
+          min="0"
+          max="24000000"
+          step="100000"
+          value={maxPrice}
+          onChange={handleMaxChange}
+          className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-lg"
+        />
       </div>
 
       <div className="flex items-center gap-3">
         <div className="flex-1">
-          <input
-            type="text"
-            value={minPrice.toLocaleString()}
-            readOnly
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-gray-50"
-          />
-          <span className="text-xs text-gray-500 ml-1">VND</span>
+          <div className="px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 bg-slate-50/50">
+            {minPrice.toLocaleString('vi-VN')}đ
+          </div>
         </div>
+        <span className="text-slate-400">—</span>
         <div className="flex-1">
-          <input
-            type="text"
-            value={maxPrice.toLocaleString()}
-            readOnly
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-gray-50"
-          />
-          <span className="text-xs text-gray-500 ml-1">VND</span>
+          <div className="px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 bg-slate-50/50">
+            {maxPrice.toLocaleString('vi-VN')}đ
+          </div>
         </div>
       </div>
     </div>
