@@ -6,7 +6,6 @@ import type { Account } from '../../../../services/authService';
 const pages = [
   { name: 'Partnership', path: '/partnership' },
   { name: 'Bookings', path: '/bookings' },
-  { name: 'Cart', path: '/cart' },
 ];
 
 function Navbar() {
@@ -59,15 +58,7 @@ function Navbar() {
 
   const handleNavClick = (path: string) => {
     setMobileMenuOpen(false);
-    if (path === '/cart') {
-      if (!user) {
-        navigate('/auth');
-      } else {
-        console.log('User ID:', user.account_id);
-      }
-    } else {
-      navigate(path);
-    }
+    navigate(path);
   };
 
   const handleLogout = async () => {
@@ -123,15 +114,32 @@ function Navbar() {
           {/* Auth Section */}
           <div className="flex items-center gap-3">
             {isLoading ? null : user ? (
-              <div className="relative" ref={userMenuRef}>
+              <>
+                {/* Cart Button */}
                 <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-all cursor-pointer ${
-                    isTransparent ? 'bg-white/20 hover:bg-white/30' : 'bg-violet-600 hover:bg-violet-700'
+                  onClick={() => navigate('/cart')}
+                  className={`relative p-2 rounded-full transition-all cursor-pointer ${
+                    isTransparent 
+                      ? 'text-white hover:bg-white/10' 
+                      : 'text-slate-700 hover:text-violet-600 hover:bg-violet-50'
                   }`}
+                  title="Giỏ hàng"
                 >
-                  {getAvatarLetter()}
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
                 </button>
+
+                {/* User Avatar */}
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-all cursor-pointer ${
+                      isTransparent ? 'bg-white/20 hover:bg-white/30' : 'bg-violet-600 hover:bg-violet-700'
+                    }`}
+                  >
+                    {getAvatarLetter()}
+                  </button>
                 
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
@@ -151,6 +159,7 @@ function Navbar() {
                   </div>
                 )}
               </div>
+              </>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <button
