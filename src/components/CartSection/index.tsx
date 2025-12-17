@@ -10,6 +10,7 @@ function CartSection() {
   const navigate = useNavigate();
   const {
     items,
+    loading,
     totalPrice,
     totalItems,
     toast,
@@ -19,6 +20,16 @@ function CartSection() {
     removeItem,
     handleCheckout,
   } = useCart();
+
+  if (loading) {
+    return (
+      <div className="max-w-[1400px] mx-auto px-6 py-8">
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

@@ -1,17 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { deleteBookingDetail, getCart, type CartItemResponse } from '../services/cartService';
 
 export interface CartItem {
-  roomId: number;
+  id: number; // booking_detail_id
+  offerId: number;
   roomName: string;
-  resortId: number;
   resortName: string;
   price: number;
   quantity: number;
-  maxAvailable: number;
-  area: number;
-  bedAmount: number;
-  peopleAmount: number;
-  image?: string;
+  cost: number;
+  startedAt: string;
+  finishedAt: string;
 }
 
 export interface ToastState {
@@ -20,38 +19,47 @@ export interface ToastState {
   type: 'error' | 'success';
 }
 
-const mockCartItems: CartItem[] = [
-  {
-    roomId: 1,
-    roomName: 'Deluxe Ocean View',
-    resortId: 1,
-    resortName: 'Six Senses Ninh Van Bay',
-    price: 5500000,
-    quantity: 1,
-    maxAvailable: 5,
-    area: 45,
-    bedAmount: 1,
-    peopleAmount: 2,
-  },
-  {
-    roomId: 2,
-    roomName: 'Premium Suite',
-    resortId: 1,
-    resortName: 'Six Senses Ninh Van Bay',
-    price: 8200000,
-    quantity: 2,
-    maxAvailable: 3,
-    area: 65,
-    bedAmount: 2,
-    peopleAmount: 4,
-  },
-];
+// Map API response to CartItem
+const mapCartItem = (item: CartItemResponse): CartItem => ({
+  id: item.id,
+  offerId: item.offer_id,
+  roomName: item.room_type_name,
+  resortName: item.resort_name,
+  price: item.price_per_room,
+  quantity: item.number_of_rooms,
+  cost: item.cost,
+  startedAt: item.started_at,
+  finishedAt: item.finished_at,
+});
 
 export function useCart() {
-  const [items, setItems] = useState<CartItem[]>(mockCartItems);
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'error' });
 
-  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Fetch cart on mount
+  const fetchCart = useCallback(async () => {
+    try {
+      setLoading(true);
+      const cart = await getCart();
+      if (cart && cart.items) {
+        setItems(cart.items.map(mapCartItem));
+      } else {
+        setItems([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  const totalPrice = items.reduce((sum, item) => sum + item.cost, 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const showToast = useCallback((message: string, type: 'error' | 'success' = 'error') => {
@@ -63,31 +71,26 @@ export function useCart() {
     setToast({ show: false, message: '', type: 'error' });
   }, []);
 
-  const increaseQuantity = useCallback((roomId: number) => {
-    setItems(prev => prev.map(item => {
-      if (item.roomId === roomId) {
-        if (item.quantity >= item.maxAvailable) {
-          showToast(`Chỉ còn ${item.maxAvailable} phòng "${item.roomName}" khả dụng`, 'error');
-          return item;
-        }
-        return { ...item, quantity: item.quantity + 1 };
-      }
-      return item;
-    }));
+  // TODO: Implement với API PUT /booking-detail/{id}
+  const increaseQuantity = useCallback((itemId: number) => {
+    console.log('Increase quantity for item:', itemId);
+    showToast('Chức năng đang phát triển', 'error');
   }, [showToast]);
 
-  const decreaseQuantity = useCallback((roomId: number) => {
-    setItems(prev => prev.map(item => {
-      if (item.roomId === roomId && item.quantity > 1) {
-        return { ...item, quantity: item.quantity - 1 };
-      }
-      return item;
-    }));
-  }, []);
+  const decreaseQuantity = useCallback((itemId: number) => {
+    console.log('Decrease quantity for item:', itemId);
+    showToast('Chức năng đang phát triển', 'error');
+  }, [showToast]);
 
-  const removeItem = useCallback((roomId: number) => {
-    setItems(prev => prev.filter(item => item.roomId !== roomId));
-    showToast('Đã xóa phòng khỏi giỏ hàng', 'success');
+  const removeItem = useCallback(async (bookingDetailId: number) => {
+    try {
+      await deleteBookingDetail(bookingDetailId);
+      setItems(prev => prev.filter(item => item.id !== bookingDetailId));
+      showToast('Đã xóa phòng khỏi giỏ hàng', 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Không thể xóa item';
+      showToast(message, 'error');
+    }
   }, [showToast]);
 
   const handleCheckout = useCallback(() => {
@@ -98,13 +101,9 @@ export function useCart() {
     // TODO: navigate('/checkout', { state: { items, totalPrice } });
   }, [items, totalPrice]);
 
-  const checkRoomAvailability = useCallback(async (roomId: number): Promise<number> => {
-    const item = items.find(i => i.roomId === roomId);
-    return item?.maxAvailable ?? 0;
-  }, [items]);
-
   return {
     items,
+    loading,
     totalPrice,
     totalItems,
     toast,
@@ -113,6 +112,6 @@ export function useCart() {
     decreaseQuantity,
     removeItem,
     handleCheckout,
-    checkRoomAvailability,
+    refetch: fetchCart,
   };
 }

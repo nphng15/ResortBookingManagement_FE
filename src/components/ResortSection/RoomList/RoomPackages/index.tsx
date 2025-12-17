@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router';
 import styles from './index.module.css'
 import RoomOptions from './RoomOptions';
 import RoomDetails from './RoomDetails';
@@ -5,12 +7,18 @@ import GuestIcon from './GuestIcon';
 import AddBtn from './AddBtn';
 import Price from '../../components/Price';
 import type { RoomType } from '../../../../services/resortService';
+import { addToCart } from '../../../../services/cartService';
+import { getToken } from '../../../../services/authService';
 
 interface RoomPackagesProps {
   room: RoomType;
 }
 
 function RoomPackages({ room }: RoomPackagesProps) {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const optionsData = ["Không gồm bữa sáng", "Miễn phí hủy phòng"];
   
   const detailsData = [
@@ -19,8 +27,35 @@ function RoomPackages({ room }: RoomPackagesProps) {
     { text: "Miễn phí hủy phòng", icon: "cancel", theme: 'success' as const }
   ];
 
-  const handleSelect = () => {
-    console.log('Selected room:', room.id);
+  const handleSelect = async () => {
+    // Kiểm tra đăng nhập
+    const token = getToken();
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Lấy ngày từ URL params
+      const checkin = searchParams.get('checkin') || new Date().toISOString().split('T')[0];
+      const checkout = searchParams.get('checkout') || new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+      await addToCart({
+        offer_id: room.id,
+        number_of_rooms: 1,
+        started_at: `${checkin}T14:00:00`,
+        finished_at: `${checkout}T12:00:00`,
+      });
+
+      alert('Đã thêm vào giỏ hàng!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Có lỗi xảy ra';
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,7 +92,7 @@ function RoomPackages({ room }: RoomPackagesProps) {
 
             {/* Cột 4: Nút Add */}
             <td className={styles.colAction}>
-              <AddBtn onClick={handleSelect} />
+              <AddBtn onClick={handleSelect} disabled={loading} />
             </td>
           </tr>
         </tbody>

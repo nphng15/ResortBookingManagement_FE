@@ -3,9 +3,9 @@ import type { CartItem as CartItemType } from '../../hooks/useCart';
 
 interface CartListProps {
   items: CartItemType[];
-  onIncrease: (roomId: number) => void;
-  onDecrease: (roomId: number) => void;
-  onRemove: (roomId: number) => void;
+  onIncrease: (itemId: number) => void;
+  onDecrease: (itemId: number) => void;
+  onRemove: (bookingDetailId: number) => void;
 }
 
 function CartList({ items, onIncrease, onDecrease, onRemove }: CartListProps) {
@@ -23,7 +23,7 @@ function CartList({ items, onIncrease, onDecrease, onRemove }: CartListProps) {
       <div className="space-y-4">
         {items.map(item => (
           <CartItem
-            key={item.roomId}
+            key={item.id}
             item={item}
             onIncrease={onIncrease}
             onDecrease={onDecrease}
