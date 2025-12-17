@@ -9,6 +9,7 @@ import ResortList from "../pages/ResortList";
 import ResortDetail from "../pages/ResortDetails";
 import AuthPage from "../pages/Auth";
 import CartPage from "../pages/Cart";
+import PaymentResult from "../pages/PaymentResult";
 
 function AppRoutes() {
   return (
@@ -20,6 +21,7 @@ function AppRoutes() {
           <Route path="/search" element={<ResortList />} />
           <Route path="/resort/:id" element={<ResortDetail />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/payment-result" element={<PaymentResult />} />
         </Route>
 
         {/* Auth Routes */}

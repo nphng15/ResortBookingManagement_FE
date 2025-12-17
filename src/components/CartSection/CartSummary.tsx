@@ -1,12 +1,24 @@
+import { useState } from 'react';
 import { CreditCard, Shield, Clock } from 'lucide-react';
 
 interface CartSummaryProps {
   totalItems: number;
   totalPrice: number;
-  onCheckout: () => void;
+  onCheckout: () => Promise<void>;
 }
 
 function CartSummary({ totalItems, totalPrice, onCheckout }: CartSummaryProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleCheckout = async () => {
+    setIsProcessing(true);
+    try {
+      await onCheckout();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden sticky top-24">
       {/* Header */}
@@ -34,12 +46,21 @@ function CartSummary({ totalItems, totalPrice, onCheckout }: CartSummaryProps) {
 
         {/* Checkout Button */}
         <button
-          onClick={onCheckout}
-          disabled={totalItems === 0}
+          onClick={handleCheckout}
+          disabled={totalItems === 0 || isProcessing}
           className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-blue-500/25 cursor-pointer"
         >
-          <CreditCard size={20} />
-          Tiến hành thanh toán
+          {isProcessing ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              Đang xử lý...
+            </>
+          ) : (
+            <>
+              <CreditCard size={20} />
+              Tiến hành thanh toán
+            </>
+          )}
         </button>
 
         {/* Trust Badges */}

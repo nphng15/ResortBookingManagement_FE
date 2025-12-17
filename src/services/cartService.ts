@@ -14,6 +14,7 @@ export interface CartItemResponse {
   started_at: string;
   finished_at: string;
   status: string;
+  partner_id: number;
 }
 
 export interface CartResponse {

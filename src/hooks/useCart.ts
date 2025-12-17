@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { deleteBookingDetail, getCart, type CartItemResponse } from '../services/cartService';
+import { createZaloPayOrder, saveAppTransId } from '../services/zalopayService';
 
 export interface CartItem {
   id: number; // booking_detail_id
@@ -11,6 +12,7 @@ export interface CartItem {
   cost: number;
   startedAt: string;
   finishedAt: string;
+  partnerId?: number;
 }
 
 export interface ToastState {
@@ -30,10 +32,12 @@ const mapCartItem = (item: CartItemResponse): CartItem => ({
   cost: item.cost,
   startedAt: item.started_at,
   finishedAt: item.finished_at,
+  partnerId: item.partner_id,
 });
 
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [cartId, setCartId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'error' });
 
@@ -43,12 +47,15 @@ export function useCart() {
       setLoading(true);
       const cart = await getCart();
       if (cart && cart.items) {
+        setCartId(cart.id);
         setItems(cart.items.map(mapCartItem));
       } else {
+        setCartId(null);
         setItems([]);
       }
     } catch (error) {
       console.error('Failed to fetch cart:', error);
+      setCartId(null);
       setItems([]);
     } finally {
       setLoading(false);
@@ -93,16 +100,39 @@ export function useCart() {
     }
   }, [showToast]);
 
-  const handleCheckout = useCallback(() => {
-    console.log('=== CHECKOUT ===');
-    console.log('Tổng tiền:', totalPrice.toLocaleString('vi-VN'), 'đ');
-    console.log('Chi tiết đơn hàng:', items);
-    console.log('================');
-    // TODO: navigate('/checkout', { state: { items, totalPrice } });
-  }, [items, totalPrice]);
+  // Thanh toán qua ZaloPay - trả về order_url để redirect
+  const handleCheckout = useCallback(async (bookingId: number): Promise<string | null> => {
+    if (items.length === 0) {
+      showToast('Giỏ hàng trống', 'error');
+      return null;
+    }
+
+    try {
+      const redirectUrl = `${window.location.origin}/payment-result`;
+      
+      const result = await createZaloPayOrder({
+        booking_id: bookingId,
+        redirect_url: redirectUrl,
+      });
+
+      if (result.return_code === 1 && result.order_url && result.app_trans_id) {
+        // Lưu app_trans_id để query sau
+        saveAppTransId(result.app_trans_id);
+        return result.order_url;
+      } else {
+        showToast(result.return_message || 'Không thể tạo đơn thanh toán', 'error');
+        return null;
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Thanh toán thất bại';
+      showToast(message, 'error');
+      return null;
+    }
+  }, [items, showToast]);
 
   return {
     items,
+    cartId,
     loading,
     totalPrice,
     totalItems,

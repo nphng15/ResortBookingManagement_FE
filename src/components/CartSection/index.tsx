@@ -10,6 +10,7 @@ function CartSection() {
   const navigate = useNavigate();
   const {
     items,
+    cartId,
     loading,
     totalPrice,
     totalItems,
@@ -70,7 +71,14 @@ function CartSection() {
             <CartSummary
               totalItems={totalItems}
               totalPrice={totalPrice}
-              onCheckout={handleCheckout}
+              onCheckout={async () => {
+                if (!cartId) return;
+                const orderUrl = await handleCheckout(cartId);
+                if (orderUrl) {
+                  // Redirect đến trang thanh toán ZaloPay
+                  window.location.href = orderUrl;
+                }
+              }}
             />
           </div>
         </div>
