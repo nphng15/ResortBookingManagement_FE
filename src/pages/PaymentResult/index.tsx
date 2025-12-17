@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { CheckCircle, XCircle, Loader2, Home, RotateCcw } from 'lucide-react';
 import { queryZaloPayStatus, getAppTransId, clearAppTransId } from '../../services/zalopayService';
 
@@ -7,18 +7,24 @@ type PaymentStatus = 'loading' | 'success' | 'processing' | 'failed';
 
 function PaymentResult() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<PaymentStatus>('loading');
   const [message, setMessage] = useState('');
   const [amount, setAmount] = useState<number | null>(null);
 
   useEffect(() => {
     const checkPayment = async () => {
-      const appTransId = getAppTransId();
+      const appTransId = searchParams.get('apptransid') || getAppTransId();
+      const urlAmount = searchParams.get('amount');
       
       if (!appTransId) {
         setStatus('failed');
         setMessage('Không tìm thấy thông tin giao dịch');
         return;
+      }
+      
+      if (urlAmount) {
+        setAmount(parseInt(urlAmount, 10));
       }
 
       try {

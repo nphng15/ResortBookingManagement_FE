@@ -5,6 +5,7 @@ import CartSummary from './CartSummary';
 import EmptyCart from './EmptyCart';
 import Toast from './Toast';
 import { useCart } from '../../hooks/useCart';
+import { useZaloPay } from '../../hooks/useZaloPay';
 
 function CartSection() {
   const navigate = useNavigate();
@@ -15,12 +16,14 @@ function CartSection() {
     totalPrice,
     totalItems,
     toast,
+    showToast,
     closeToast,
     increaseQuantity,
     decreaseQuantity,
     removeItem,
-    handleCheckout,
   } = useCart();
+  
+  const { createPayment } = useZaloPay();
 
   if (loading) {
     return (
@@ -72,10 +75,12 @@ function CartSection() {
               totalItems={totalItems}
               totalPrice={totalPrice}
               onCheckout={async () => {
-                if (!cartId) return;
-                const orderUrl = await handleCheckout(cartId);
+                if (!cartId) {
+                  showToast('Không tìm thấy giỏ hàng', 'error');
+                  return;
+                }
+                const orderUrl = await createPayment(cartId);
                 if (orderUrl) {
-                  // Redirect đến trang thanh toán ZaloPay
                   window.location.href = orderUrl;
                 }
               }}

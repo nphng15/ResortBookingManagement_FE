@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { deleteBookingDetail, getCart, type CartItemResponse } from '../services/cartService';
-import { createZaloPayOrder, saveAppTransId } from '../services/zalopayService';
 
 export interface CartItem {
   id: number; // booking_detail_id
@@ -100,36 +99,6 @@ export function useCart() {
     }
   }, [showToast]);
 
-  // Thanh toán qua ZaloPay - trả về order_url để redirect
-  const handleCheckout = useCallback(async (bookingId: number): Promise<string | null> => {
-    if (items.length === 0) {
-      showToast('Giỏ hàng trống', 'error');
-      return null;
-    }
-
-    try {
-      const redirectUrl = `${window.location.origin}/payment-result`;
-      
-      const result = await createZaloPayOrder({
-        booking_id: bookingId,
-        redirect_url: redirectUrl,
-      });
-
-      if (result.return_code === 1 && result.order_url && result.app_trans_id) {
-        // Lưu app_trans_id để query sau
-        saveAppTransId(result.app_trans_id);
-        return result.order_url;
-      } else {
-        showToast(result.return_message || 'Không thể tạo đơn thanh toán', 'error');
-        return null;
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Thanh toán thất bại';
-      showToast(message, 'error');
-      return null;
-    }
-  }, [items, showToast]);
-
   return {
     items,
     cartId,
@@ -137,11 +106,11 @@ export function useCart() {
     totalPrice,
     totalItems,
     toast,
+    showToast,
     closeToast,
     increaseQuantity,
     decreaseQuantity,
     removeItem,
-    handleCheckout,
     refetch: fetchCart,
   };
 }
