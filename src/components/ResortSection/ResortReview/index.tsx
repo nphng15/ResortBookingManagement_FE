@@ -4,7 +4,7 @@ import { useFeedback } from "../../../hooks/useFeedback";
 
 interface CommentData {
   id: number;
-  user: { name: string; avatar: string };
+  username: string;
   rating: number;
   text: string;
   date: string;
@@ -69,10 +69,7 @@ const ResortReview: React.FC<ResortReviewProps> = ({ resortId }) => {
         const feedbacks = await getResortFeedbacks(resortId);
         const mapped: CommentData[] = feedbacks.map((fb: Feedback) => ({
           id: fb.id,
-          user: { 
-            name: `Khách hàng #${fb.customer_id}`, 
-            avatar: `https://i.pravatar.cc/150?u=${fb.customer_id}` 
-          },
+          username: fb.username,
           rating: fb.rating,
           text: fb.comment,
           date: new Date(fb.created_at).toLocaleDateString("vi-VN"),
@@ -109,10 +106,7 @@ const ResortReview: React.FC<ResortReviewProps> = ({ resortId }) => {
     if (feedback) {
       const newReview: CommentData = {
         id: feedback.id,
-        user: { 
-          name: `Khách hàng #${feedback.customer_id}`, 
-          avatar: `https://i.pravatar.cc/150?u=${feedback.customer_id}` 
-        },
+        username: feedback.username,
         rating: feedback.rating,
         text: feedback.comment,
         date: new Date(feedback.created_at).toLocaleDateString("vi-VN"),
@@ -214,13 +208,11 @@ const ResortReview: React.FC<ResortReviewProps> = ({ resortId }) => {
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={c.user.avatar}
-                          alt={c.user.name}
-                          className="w-10 h-10 rounded-full border border-gray-200 object-cover"
-                        />
+                        <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-lg">
+                          {(c.username || "K").charAt(0).toUpperCase()}
+                        </div>
                         <div>
-                          <p className="font-semibold text-gray-900">{c.user.name}</p>
+                          <p className="font-semibold text-gray-900">{c.username}</p>
                           <p className="text-xs text-gray-500">{c.date}</p>
                         </div>
                       </div>
