@@ -23,6 +23,8 @@ export interface Account {
   status: 'ACTIVE' | 'PENDING' | 'REJECTED' | 'INACTIVE';
   created_at: string;
   roles: string[];
+  partner_id?: number; // ID của partner nếu role là PARTNER
+  customer_id?: number; // ID của customer nếu role là CUSTOMER
 }
 
 export interface RegisterResponse {
@@ -139,8 +141,13 @@ export const getCurrentUser = async (): Promise<Account> => {
   });
 
   if (!response.ok) {
-    removeToken();
-    throw new Error('Phiên đăng nhập hết hạn');
+    // Chỉ xóa token nếu là lỗi 401 (Unauthorized)
+    if (response.status === 401) {
+      removeToken();
+      throw new Error('Phiên đăng nhập hết hạn');
+    }
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || error.message || 'Không thể lấy thông tin người dùng');
   }
 
   return response.json();
@@ -213,3 +220,5 @@ export const approvePartner = async (data: ApprovePartnerRequest): Promise<Appro
 export const isAuthenticated = (): boolean => {
   return !!getToken();
 };
+
+

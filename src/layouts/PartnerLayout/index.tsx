@@ -1,5 +1,14 @@
-import { Outlet, NavLink, useLocation } from 'react-router';
-import { CalendarDaysIcon, ChartBarIcon, ArrowRightOnRectangleIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router';
+import {
+  CalendarDaysIcon,
+  ChartBarIcon,
+  ArrowRightOnRectangleIcon,
+  HomeIcon,
+  UserCircleIcon,
+} from '@heroicons/react/24/outline';
+import { getCurrentUser, logout, getToken } from '../../services/authService';
+import type { Account } from '../../services/authService';
 
 const navItems = [
   { path: '/partner/bookings', label: 'Quản lý đặt phòng', icon: CalendarDaysIcon },
@@ -8,6 +17,47 @@ const navItems = [
 
 export default function PartnerLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<Account | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = getToken();
+      if (!token) {
+        navigate('/auth');
+        return;
+      }
+      try {
+        const userData = await getCurrentUser();
+        if (!userData.roles.includes('PARTNER')) {
+          navigate('/');
+          return;
+        }
+        setUser(userData);
+      } catch {
+        navigate('/auth');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/auth');
+  };
+
+  const getAvatarLetter = () => user?.username?.charAt(0).toUpperCase() || 'P';
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -44,13 +94,21 @@ export default function PartnerLayout() {
           })}
         </nav>
 
-        {/* Footer */}
+        {/* Footer - User Info */}
         <div className="p-3 border-t border-gray-100">
-          <div className="px-3 py-2 mb-2">
-            <p className="text-xs text-gray-500">Đối tác</p>
-            <p className="text-sm font-medium text-gray-900">Resort ABC</p>
+          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+              <span className="text-sm font-bold text-emerald-600">{getAvatarLetter()}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">{user?.username}</p>
+              <p className="text-xs text-gray-500">Đối tác</p>
+            </div>
           </div>
-          <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 w-full transition-colors cursor-pointer">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 w-full transition-colors cursor-pointer"
+          >
             <ArrowRightOnRectangleIcon className="w-5 h-5" />
             Đăng xuất
           </button>
@@ -65,18 +123,19 @@ export default function PartnerLayout() {
             {navItems.find((item) => item.path === location.pathname)?.label || 'Dashboard'}
           </h1>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-emerald-600">P</span>
-              </div>
-              <span className="text-sm font-medium text-gray-700">Partner</span>
-            </div>
+            <button
+              onClick={() => navigate('/partner/profile')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+            >
+              <UserCircleIcon className="w-5 h-5" />
+              <span className="text-sm font-medium">{user?.username}</span>
+            </button>
           </div>
         </header>
 
         {/* Page Content */}
         <div className="p-8">
-          <Outlet />
+          <Outlet context={{ user, partnerId: user?.partner_id }} />
         </div>
       </main>
     </div>

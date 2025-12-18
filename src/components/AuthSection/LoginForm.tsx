@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { login } from '../../services/authService';
+import { login, getCurrentUser } from '../../services/authService';
 import FormInput from './components/FormInput';
 import SocialButtons from './components/SocialButtons';
 
@@ -22,8 +22,20 @@ function LoginForm({ isActive, onSuccess }: LoginFormProps) {
 
     try {
       await login(form);
+      
+      // Lấy thông tin user để kiểm tra role
+      const user = await getCurrentUser();
       onSuccess?.();
-      navigate('/');
+      
+      // Chuyển hướng theo role
+      if (user.roles.includes('PARTNER')) {
+        navigate('/partner');
+      } else if (user.roles.includes('ADMIN')) {
+        navigate('/admin');
+      } else {
+        // CUSTOMER hoặc role khác -> trang chủ
+        navigate('/');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập thất bại');
     } finally {

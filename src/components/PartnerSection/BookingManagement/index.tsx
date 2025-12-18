@@ -1,8 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useOutletContext } from 'react-router';
 import { CalendarDaysIcon, TableCellsIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { DateRangePicker, BookingCalendar, Modal } from '../components';
 import { fetchBookingSchedule, getCurrentWeekRange } from './api';
+import { getPartnerResorts, type PartnerResort } from '../../../services/partnerBookingService';
 import type { BookingSchedule } from './types';
+import type { Account } from '../../../services/authService';
+
+interface PartnerContext {
+  user: Account | null;
+  partnerId: number | undefined;
+}
 
 const formatDateTime = (dateStr: string) => {
   return new Date(dateStr).toLocaleString('vi-VN');
@@ -15,30 +23,54 @@ const formatDateForInput = (date: Date) => {
 type ViewMode = 'calendar' | 'list';
 
 export default function BookingManagement() {
+  const { partnerId } = useOutletContext<PartnerContext>();
+
   const [bookings, setBookings] = useState<BookingSchedule[]>([]);
+  const [resorts, setResorts] = useState<PartnerResort[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [selectedBooking, setSelectedBooking] = useState<BookingSchedule | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedResortId, setSelectedResortId] = useState<number | undefined>(undefined);
 
   const weekRange = getCurrentWeekRange();
   const [startDate, setStartDate] = useState(formatDateForInput(weekRange.start));
   const [endDate, setEndDate] = useState(formatDateForInput(weekRange.end));
 
+  // Load danh sách resort của partner
+  useEffect(() => {
+    if (!partnerId) return;
+    const loadResorts = async () => {
+      try {
+        const data = await getPartnerResorts(partnerId);
+        setResorts(data);
+      } catch (err) {
+        console.error('Failed to fetch resorts:', err);
+      }
+    };
+    loadResorts();
+  }, [partnerId]);
+
   const loadData = useCallback(async () => {
+    if (!partnerId) return;
     setIsLoading(true);
+    setError(null);
     try {
-      const data = await fetchBookingSchedule(1, {
+      const data = await fetchBookingSchedule(partnerId, {
         start: `${startDate}T00:00:00`,
         end: `${endDate}T23:59:59`,
+        resortId: selectedResortId,
       });
       setBookings(data);
-    } catch (error) {
-      console.error('Failed to fetch bookings:', error);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không thể tải dữ liệu';
+      setError(message);
+      console.error('Failed to fetch bookings:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [partnerId, startDate, endDate, selectedResortId]);
 
   useEffect(() => {
     loadData();
@@ -59,6 +91,10 @@ export default function BookingManagement() {
     setEndDate(formatDateForInput(end));
   };
 
+  const handleResortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedResortId(value ? Number(value) : undefined);
+  };
 
   return (
     <div>
@@ -80,8 +116,8 @@ export default function BookingManagement() {
         </div>
       </div>
 
-      {/* Date Range Controls */}
-      <div className="flex items-center justify-between mb-6">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
           <button onClick={() => navigateWeek('prev')} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
             <ChevronLeftIcon className="w-5 h-5" />
@@ -91,10 +127,34 @@ export default function BookingManagement() {
             <ChevronRightIcon className="w-5 h-5" />
           </button>
         </div>
-        <button onClick={loadData} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
-          Tải lại
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* Resort Filter */}
+          <select
+            value={selectedResortId ?? ''}
+            onChange={handleResortChange}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          >
+            <option value="">Tất cả resort</option>
+            {resorts.map((resort) => (
+              <option key={resort.id} value={resort.id}>
+                {resort.name}
+              </option>
+            ))}
+          </select>
+
+          <button onClick={loadData} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
+            Tải lại
+          </button>
+        </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Content */}
       {isLoading ? (
