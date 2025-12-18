@@ -92,3 +92,32 @@ export const getResortFeedbacks = async (resortId: number): Promise<Feedback[]> 
   
   return response.json();
 };
+
+export interface SubmitFeedbackRequest {
+  rating: number;
+  comment: string;
+}
+
+export const submitFeedback = async (
+  resortId: number,
+  data: SubmitFeedbackRequest,
+  token: string
+): Promise<Feedback> => {
+  const url = `${API_BASE_URL}/resorts/${resortId}/feedbacks`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Không thể gửi đánh giá');
+  }
+
+  return response.json();
+};
