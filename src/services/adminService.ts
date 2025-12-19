@@ -97,3 +97,173 @@ export async function updateWithdrawStatus(id: number, action: 'APPROVE' | 'REJE
     throw new Error(error.detail || (action === 'APPROVE' ? 'Duyệt yêu cầu thất bại' : 'Từ chối yêu cầu thất bại'));
   }
 }
+
+// ==================== Account Management Types ====================
+
+export interface AccountListItem {
+  account_id: number;
+  username: string;
+  status: 'ACTIVE' | 'BANNED' | 'PENDING' | 'REJECTED';
+  account_type: 'CUSTOMER' | 'PARTNER';
+  name: string;
+  phone_number: string;
+}
+
+export interface AccountFilters {
+  account_type?: 'CUSTOMER' | 'PARTNER';
+  status?: 'ACTIVE' | 'BANNED' | 'PENDING' | 'REJECTED';
+  search?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export interface CustomerDetail {
+  id: number;
+  fullname: string;
+  email: string;
+  phone_number: string;
+  id_number: string;
+}
+
+export interface PartnerDetail {
+  id: number;
+  name: string;
+  phone_number: string;
+  address: string;
+  banking_number: string;
+  bank: string;
+  balance: number;
+}
+
+export interface AccountDetail {
+  account_id: number;
+  username: string;
+  status: string;
+  created_at: string;
+  roles: string[];
+  customer?: CustomerDetail;
+  partner?: PartnerDetail;
+}
+
+export interface BanUnbanRequest {
+  account_id: number;
+  reason?: string;
+}
+
+export interface BanUnbanResponse {
+  message: string;
+  account_id: number;
+  status: string;
+}
+
+// ==================== Account Management APIs ====================
+
+/**
+ * Fetch accounts list
+ * GET /api/v1/admin/accounts
+ */
+export async function fetchAccounts(filters: AccountFilters): Promise<AccountListItem[]> {
+  const token = getToken();
+  if (!token) throw new Error('Chưa đăng nhập');
+
+  const params = new URLSearchParams();
+  if (filters.account_type) params.append('account_type', filters.account_type);
+  if (filters.status) params.append('status', filters.status);
+  if (filters.search) params.append('search', filters.search);
+  if (filters.page) params.append('page', filters.page.toString());
+  if (filters.page_size) params.append('page_size', filters.page_size.toString());
+
+  const response = await fetch(`${API_BASE_URL}/admin/accounts?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('Phiên đăng nhập hết hạn');
+    if (response.status === 403) throw new Error('Bạn không có quyền truy cập');
+    throw new Error('Không thể tải danh sách tài khoản');
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetch account detail
+ * GET /api/v1/admin/accounts/{account_id}
+ */
+export async function fetchAccountDetail(accountId: number): Promise<AccountDetail> {
+  const token = getToken();
+  if (!token) throw new Error('Chưa đăng nhập');
+
+  const response = await fetch(`${API_BASE_URL}/admin/accounts/${accountId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('Phiên đăng nhập hết hạn');
+    if (response.status === 404) throw new Error('Không tìm thấy tài khoản');
+    throw new Error('Không thể tải thông tin tài khoản');
+  }
+
+  return response.json();
+}
+
+/**
+ * Ban account
+ * POST /api/v1/admin/accounts/ban
+ */
+export async function banAccount(data: BanUnbanRequest): Promise<BanUnbanResponse> {
+  const token = getToken();
+  if (!token) throw new Error('Chưa đăng nhập');
+
+  const response = await fetch(`${API_BASE_URL}/admin/accounts/ban`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('Phiên đăng nhập hết hạn');
+    if (response.status === 403) throw new Error('Không thể cấm tài khoản admin');
+    if (response.status === 404) throw new Error('Không tìm thấy tài khoản');
+    if (response.status === 400) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Tài khoản đã bị cấm trước đó');
+    }
+    throw new Error('Cấm tài khoản thất bại');
+  }
+
+  return response.json();
+}
+
+/**
+ * Unban account
+ * POST /api/v1/admin/accounts/unban
+ */
+export async function unbanAccount(data: BanUnbanRequest): Promise<BanUnbanResponse> {
+  const token = getToken();
+  if (!token) throw new Error('Chưa đăng nhập');
+
+  const response = await fetch(`${API_BASE_URL}/admin/accounts/unban`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('Phiên đăng nhập hết hạn');
+    if (response.status === 404) throw new Error('Không tìm thấy tài khoản');
+    if (response.status === 400) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Tài khoản không ở trạng thái bị cấm');
+    }
+    throw new Error('Bỏ cấm tài khoản thất bại');
+  }
+
+  return response.json();
+}

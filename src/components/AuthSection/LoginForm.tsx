@@ -37,7 +37,13 @@ function LoginForm({ isActive, onSuccess }: LoginFormProps) {
         navigate('/');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Đăng nhập thất bại');
+      const errorMessage = err instanceof Error ? err.message : 'Đăng nhập thất bại';
+      // Kiểm tra nếu tài khoản bị ban
+      if (errorMessage.toLowerCase().includes('banned') || errorMessage.toLowerCase().includes('bị cấm')) {
+        setError('Tài khoản của bạn đã bị cấm. Vui lòng liên hệ bộ phận CSKH để được hỗ trợ.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

@@ -1,76 +1,131 @@
-import { useState } from 'react';
-import { PencilSquareIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { EyeIcon, NoSymbolIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { StatusBadge, SearchInput, Pagination, Modal, DataTable, ActionButton } from '../components';
-
-interface Partner {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  businessName: string;
-  status: string;
-  createdAt: string;
-}
-
-const mockPartners: Partner[] = [
-  { id: 1, name: 'Nguyễn Minh Tuấn', email: 'resort.abc@email.com', phone: '0901111222', businessName: 'Resort ABC', status: 'ACTIVE', createdAt: '2025-01-10' },
-  { id: 2, name: 'Trần Văn Hùng', email: 'villa.ocean@email.com', phone: '0902222333', businessName: 'Villa Ocean View', status: 'ACTIVE', createdAt: '2025-02-15' },
-  { id: 3, name: 'Lê Thị Mai', email: 'hotel.sunrise@email.com', phone: '0903333444', businessName: 'Hotel Sunrise', status: 'INACTIVE', createdAt: '2025-03-20' },
-  { id: 4, name: 'Phạm Quốc Bảo', email: 'homestay.green@email.com', phone: '0904444555', businessName: 'Homestay Green Valley', status: 'ACTIVE', createdAt: '2025-04-25' },
-  { id: 5, name: 'Hoàng Thị Lan', email: 'resort.mountain@email.com', phone: '0905555666', businessName: 'Mountain Resort', status: 'BLOCKED', createdAt: '2025-05-30' },
-  { id: 6, name: 'Vũ Đức Anh', email: 'hotel.city@email.com', phone: '0906666777', businessName: 'City Hotel', status: 'ACTIVE', createdAt: '2025-06-15' },
-];
+import { fetchAccounts, fetchAccountDetail, banAccount, unbanAccount } from '../../../services/adminService';
+import type { AccountListItem, AccountDetail } from '../../../services/adminService';
 
 export default function PartnerManagement() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [partners, setPartners] = useState<AccountListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  const [selectedPartner, setSelectedPartner] = useState<AccountDetail | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '', businessName: '', status: '' });
+  const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+  const [banTarget, setBanTarget] = useState<AccountListItem | null>(null);
+  const [banReason, setBanReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const pageSize = 5;
-  const filtered = mockPartners.filter(
-    (p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.businessName.toLowerCase().includes(search.toLowerCase())
-  );
-  const totalPages = Math.ceil(filtered.length / pageSize);
-  const paginatedData = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const pageSize = 10;
 
-  const handleView = (partner: Partner) => {
-    setSelectedPartner(partner);
-    setIsViewOpen(true);
+  const loadPartners = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await fetchAccounts({
+        account_type: 'PARTNER',
+        status: statusFilter as 'ACTIVE' | 'BANNED' | 'PENDING' | 'REJECTED' | undefined,
+        search: search || undefined,
+        page,
+        page_size: pageSize,
+      });
+      setPartners(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể tải danh sách');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEdit = (partner: Partner) => {
-    setSelectedPartner(partner);
-    setEditForm({ name: partner.name, email: partner.email, phone: partner.phone, businessName: partner.businessName, status: partner.status });
-    setIsEditOpen(true);
+  useEffect(() => {
+    loadPartners();
+  }, [page, statusFilter]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+      loadPartners();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const handleView = async (partner: AccountListItem) => {
+    try {
+      const detail = await fetchAccountDetail(partner.account_id);
+      setSelectedPartner(detail);
+      setIsViewOpen(true);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Không thể tải thông tin');
+    }
   };
 
-  const handleSave = () => {
-    console.log('Saving partner:', editForm);
-    setIsEditOpen(false);
+  const openBanModal = (partner: AccountListItem) => {
+    setBanTarget(partner);
+    setBanReason('');
+    setIsBanModalOpen(true);
+  };
+
+  const handleBan = async () => {
+    if (!banTarget) return;
+    setActionLoading(true);
+    try {
+      await banAccount({ account_id: banTarget.account_id, reason: banReason || undefined });
+      setIsBanModalOpen(false);
+      loadPartners();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Thao tác thất bại');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUnban = async (partner: AccountListItem) => {
+    if (!confirm(`Bạn có chắc muốn bỏ cấm tài khoản "${partner.name}"?`)) return;
+    setActionLoading(true);
+    try {
+      await unbanAccount({ account_id: partner.account_id });
+      loadPartners();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Thao tác thất bại');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
   const columns = [
-    { key: 'id', header: 'ID', className: 'w-16' },
-    { key: 'businessName', header: 'Tên doanh nghiệp', render: (p: Partner) => <span className="font-medium text-gray-900">{p.businessName}</span> },
-    { key: 'name', header: 'Người đại diện' },
-    { key: 'email', header: 'Email' },
-    { key: 'phone', header: 'Số điện thoại' },
-    { key: 'status', header: 'Trạng thái', render: (p: Partner) => <StatusBadge status={p.status} /> },
+    { key: 'account_id', header: 'ID', className: 'w-16' },
+    { key: 'name', header: 'Tên doanh nghiệp', render: (p: AccountListItem) => <span className="font-medium text-gray-900">{p.name || '-'}</span> },
+    { key: 'username', header: 'Username' },
+    { key: 'phone_number', header: 'Số điện thoại', render: (p: AccountListItem) => p.phone_number || '-' },
+    { key: 'status', header: 'Trạng thái', render: (p: AccountListItem) => <StatusBadge status={p.status} /> },
     {
       key: 'actions',
       header: 'Thao tác',
-      render: (p: Partner) => (
+      render: (p: AccountListItem) => (
         <div className="flex items-center gap-2">
-          <ActionButton onClick={() => handleView(p)}><EyeIcon className="w-4 h-4" /></ActionButton>
-          <ActionButton onClick={() => handleEdit(p)}><PencilSquareIcon className="w-4 h-4" /></ActionButton>
+          <ActionButton onClick={() => handleView(p)}>
+            <EyeIcon className="w-4 h-4" />
+          </ActionButton>
+          {p.status === 'BANNED' ? (
+            <ActionButton onClick={() => handleUnban(p)} variant="success" disabled={actionLoading}>
+              <CheckCircleIcon className="w-4 h-4" />
+            </ActionButton>
+          ) : p.status === 'ACTIVE' ? (
+            <ActionButton onClick={() => openBanModal(p)} variant="danger" disabled={actionLoading}>
+              <NoSymbolIcon className="w-4 h-4" />
+            </ActionButton>
+          ) : null}
         </div>
       ),
     },
   ];
-
 
   return (
     <div>
@@ -78,14 +133,34 @@ export default function PartnerManagement() {
         <h1 className="text-2xl font-bold text-gray-900">Quản lý tài khoản đối tác</h1>
       </div>
 
-      <div className="mb-6 max-w-md">
-        <SearchInput value={search} onChange={setSearch} placeholder="Tìm theo tên hoặc tên doanh nghiệp..." />
+      <div className="flex gap-4 mb-6">
+        <div className="max-w-md flex-1">
+          <SearchInput value={search} onChange={setSearch} placeholder="Tìm theo tên hoặc username..." />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="ACTIVE">Hoạt động</option>
+          <option value="BANNED">Bị cấm</option>
+          <option value="PENDING">Chờ duyệt</option>
+          <option value="REJECTED">Từ chối</option>
+        </select>
       </div>
 
-      <DataTable columns={columns} data={paginatedData} keyExtractor={(p) => p.id} />
-      
-      {totalPages > 1 && (
-        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} totalItems={filtered.length} pageSize={pageSize} />
+      {error && <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4">{error}</div>}
+
+      {loading ? (
+        <div className="text-center py-8 text-gray-500">Đang tải...</div>
+      ) : (
+        <>
+          <DataTable columns={columns} data={partners} keyExtractor={(p) => p.account_id} />
+          {partners.length > pageSize && (
+            <Pagination currentPage={page} totalPages={Math.ceil(partners.length / pageSize)} onPageChange={setPage} totalItems={partners.length} pageSize={pageSize} />
+          )}
+        </>
       )}
 
       {/* View Modal */}
@@ -93,47 +168,43 @@ export default function PartnerManagement() {
         {selectedPartner && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div><p className="text-sm text-gray-500">Tên doanh nghiệp</p><p className="font-medium">{selectedPartner.businessName}</p></div>
-              <div><p className="text-sm text-gray-500">Người đại diện</p><p className="font-medium">{selectedPartner.name}</p></div>
-              <div><p className="text-sm text-gray-500">Email</p><p className="font-medium">{selectedPartner.email}</p></div>
-              <div><p className="text-sm text-gray-500">Số điện thoại</p><p className="font-medium">{selectedPartner.phone}</p></div>
+              <div><p className="text-sm text-gray-500">Username</p><p className="font-medium">{selectedPartner.username}</p></div>
               <div><p className="text-sm text-gray-500">Trạng thái</p><StatusBadge status={selectedPartner.status} /></div>
-              <div><p className="text-sm text-gray-500">Ngày tạo</p><p className="font-medium">{new Date(selectedPartner.createdAt).toLocaleDateString('vi-VN')}</p></div>
+              {selectedPartner.partner && (
+                <>
+                  <div><p className="text-sm text-gray-500">Tên doanh nghiệp</p><p className="font-medium">{selectedPartner.partner.name}</p></div>
+                  <div><p className="text-sm text-gray-500">Số điện thoại</p><p className="font-medium">{selectedPartner.partner.phone_number || '-'}</p></div>
+                  <div className="col-span-2"><p className="text-sm text-gray-500">Địa chỉ</p><p className="font-medium">{selectedPartner.partner.address || '-'}</p></div>
+                  <div><p className="text-sm text-gray-500">Ngân hàng</p><p className="font-medium">{selectedPartner.partner.bank || '-'}</p></div>
+                  <div><p className="text-sm text-gray-500">Số tài khoản</p><p className="font-medium">{selectedPartner.partner.banking_number || '-'}</p></div>
+                  <div><p className="text-sm text-gray-500">Số dư</p><p className="font-medium">{formatCurrency(selectedPartner.partner.balance || 0)}</p></div>
+                </>
+              )}
+              <div><p className="text-sm text-gray-500">Ngày tạo</p><p className="font-medium">{new Date(selectedPartner.created_at).toLocaleDateString('vi-VN')}</p></div>
             </div>
           </div>
         )}
       </Modal>
 
-      {/* Edit Modal */}
-      <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Chỉnh sửa đối tác">
+      {/* Ban Modal */}
+      <Modal isOpen={isBanModalOpen} onClose={() => setIsBanModalOpen(false)} title="Cấm tài khoản">
         <div className="space-y-4">
+          <p className="text-gray-600">Bạn có chắc muốn cấm tài khoản <strong>{banTarget?.name || banTarget?.username}</strong>?</p>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tên doanh nghiệp</label>
-            <input type="text" value={editForm.businessName} onChange={(e) => setEditForm({ ...editForm, businessName: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Người đại diện</label>
-            <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-            <input type="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-            <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="ACTIVE">Hoạt động</option>
-              <option value="INACTIVE">Không hoạt động</option>
-              <option value="BLOCKED">Đã khóa</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Lý do (tùy chọn)</label>
+            <textarea
+              value={banReason}
+              onChange={(e) => setBanReason(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
+              placeholder="Nhập lý do cấm tài khoản..."
+            />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <ActionButton onClick={() => setIsEditOpen(false)} variant="ghost" size="md">Hủy</ActionButton>
-            <ActionButton onClick={handleSave} variant="primary" size="md">Lưu thay đổi</ActionButton>
+            <ActionButton onClick={() => setIsBanModalOpen(false)} variant="ghost" size="md">Hủy</ActionButton>
+            <ActionButton onClick={handleBan} variant="danger" size="md" disabled={actionLoading}>
+              {actionLoading ? 'Đang xử lý...' : 'Cấm tài khoản'}
+            </ActionButton>
           </div>
         </div>
       </Modal>

@@ -1,77 +1,127 @@
-import { useState } from 'react';
-import { PencilSquareIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { EyeIcon, NoSymbolIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { StatusBadge, SearchInput, Pagination, Modal, DataTable, ActionButton } from '../components';
-
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  status: string;
-  createdAt: string;
-}
-
-const mockCustomers: Customer[] = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@email.com', phone: '0901234567', status: 'ACTIVE', createdAt: '2025-01-15' },
-  { id: 2, name: 'Trần Thị B', email: 'tranthib@email.com', phone: '0912345678', status: 'ACTIVE', createdAt: '2025-02-20' },
-  { id: 3, name: 'Lê Văn C', email: 'levanc@email.com', phone: '0923456789', status: 'BLOCKED', createdAt: '2025-03-10' },
-  { id: 4, name: 'Phạm Thị D', email: 'phamthid@email.com', phone: '0934567890', status: 'ACTIVE', createdAt: '2025-04-05' },
-  { id: 5, name: 'Hoàng Văn E', email: 'hoangvane@email.com', phone: '0945678901', status: 'INACTIVE', createdAt: '2025-05-12' },
-  { id: 6, name: 'Vũ Thị F', email: 'vuthif@email.com', phone: '0956789012', status: 'ACTIVE', createdAt: '2025-06-18' },
-  { id: 7, name: 'Đặng Văn G', email: 'dangvang@email.com', phone: '0967890123', status: 'ACTIVE', createdAt: '2025-07-22' },
-  { id: 8, name: 'Bùi Thị H', email: 'buithih@email.com', phone: '0978901234', status: 'BLOCKED', createdAt: '2025-08-30' },
-];
+import { fetchAccounts, fetchAccountDetail, banAccount, unbanAccount } from '../../../services/adminService';
+import type { AccountListItem, AccountDetail } from '../../../services/adminService';
 
 export default function CustomerManagement() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [customers, setCustomers] = useState<AccountListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  const [selectedCustomer, setSelectedCustomer] = useState<AccountDetail | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '', status: '' });
+  const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+  const [banTarget, setBanTarget] = useState<AccountListItem | null>(null);
+  const [banReason, setBanReason] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const pageSize = 5;
-  const filtered = mockCustomers.filter(
-    (c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase())
-  );
-  const totalPages = Math.ceil(filtered.length / pageSize);
-  const paginatedData = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const pageSize = 10;
 
-  const handleView = (customer: Customer) => {
-    setSelectedCustomer(customer);
-    setIsViewOpen(true);
+  const loadCustomers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await fetchAccounts({
+        account_type: 'CUSTOMER',
+        status: statusFilter as 'ACTIVE' | 'BANNED' | undefined,
+        search: search || undefined,
+        page,
+        page_size: pageSize,
+      });
+      setCustomers(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể tải danh sách');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEdit = (customer: Customer) => {
-    setSelectedCustomer(customer);
-    setEditForm({ name: customer.name, email: customer.email, phone: customer.phone, status: customer.status });
-    setIsEditOpen(true);
+  useEffect(() => {
+    loadCustomers();
+  }, [page, statusFilter]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+      loadCustomers();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const handleView = async (customer: AccountListItem) => {
+    try {
+      const detail = await fetchAccountDetail(customer.account_id);
+      setSelectedCustomer(detail);
+      setIsViewOpen(true);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Không thể tải thông tin');
+    }
   };
 
-  const handleSave = () => {
-    console.log('Saving customer:', editForm);
-    setIsEditOpen(false);
+  const openBanModal = (customer: AccountListItem) => {
+    setBanTarget(customer);
+    setBanReason('');
+    setIsBanModalOpen(true);
+  };
+
+  const handleBan = async () => {
+    if (!banTarget) return;
+    setActionLoading(true);
+    try {
+      await banAccount({ account_id: banTarget.account_id, reason: banReason || undefined });
+      setIsBanModalOpen(false);
+      loadCustomers();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Thao tác thất bại');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUnban = async (customer: AccountListItem) => {
+    if (!confirm(`Bạn có chắc muốn bỏ cấm tài khoản "${customer.name}"?`)) return;
+    setActionLoading(true);
+    try {
+      await unbanAccount({ account_id: customer.account_id });
+      loadCustomers();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Thao tác thất bại');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const columns = [
-    { key: 'id', header: 'ID', className: 'w-16' },
-    { key: 'name', header: 'Họ tên', render: (c: Customer) => <span className="font-medium text-gray-900">{c.name}</span> },
-    { key: 'email', header: 'Email' },
-    { key: 'phone', header: 'Số điện thoại' },
-    { key: 'status', header: 'Trạng thái', render: (c: Customer) => <StatusBadge status={c.status} /> },
-    { key: 'createdAt', header: 'Ngày tạo', render: (c: Customer) => new Date(c.createdAt).toLocaleDateString('vi-VN') },
+    { key: 'account_id', header: 'ID', className: 'w-16' },
+    { key: 'name', header: 'Họ tên', render: (c: AccountListItem) => <span className="font-medium text-gray-900">{c.name || '-'}</span> },
+    { key: 'username', header: 'Username' },
+    { key: 'phone_number', header: 'Số điện thoại', render: (c: AccountListItem) => c.phone_number || '-' },
+    { key: 'status', header: 'Trạng thái', render: (c: AccountListItem) => <StatusBadge status={c.status} /> },
     {
       key: 'actions',
       header: 'Thao tác',
-      render: (c: Customer) => (
+      render: (c: AccountListItem) => (
         <div className="flex items-center gap-2">
-          <ActionButton onClick={() => handleView(c)}><EyeIcon className="w-4 h-4" /></ActionButton>
-          <ActionButton onClick={() => handleEdit(c)}><PencilSquareIcon className="w-4 h-4" /></ActionButton>
+          <ActionButton onClick={() => handleView(c)}>
+            <EyeIcon className="w-4 h-4" />
+          </ActionButton>
+          {c.status === 'BANNED' ? (
+            <ActionButton onClick={() => handleUnban(c)} variant="success" disabled={actionLoading}>
+              <CheckCircleIcon className="w-4 h-4" />
+            </ActionButton>
+          ) : (
+            <ActionButton onClick={() => openBanModal(c)} variant="danger" disabled={actionLoading}>
+              <NoSymbolIcon className="w-4 h-4" />
+            </ActionButton>
+          )}
         </div>
       ),
     },
   ];
-
 
   return (
     <div>
@@ -79,14 +129,32 @@ export default function CustomerManagement() {
         <h1 className="text-2xl font-bold text-gray-900">Quản lý tài khoản khách hàng</h1>
       </div>
 
-      <div className="mb-6 max-w-md">
-        <SearchInput value={search} onChange={setSearch} placeholder="Tìm theo tên hoặc email..." />
+      <div className="flex gap-4 mb-6">
+        <div className="max-w-md flex-1">
+          <SearchInput value={search} onChange={setSearch} placeholder="Tìm theo tên hoặc username..." />
+        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="ACTIVE">Hoạt động</option>
+          <option value="BANNED">Bị cấm</option>
+        </select>
       </div>
 
-      <DataTable columns={columns} data={paginatedData} keyExtractor={(c) => c.id} />
-      
-      {totalPages > 1 && (
-        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} totalItems={filtered.length} pageSize={pageSize} />
+      {error && <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4">{error}</div>}
+
+      {loading ? (
+        <div className="text-center py-8 text-gray-500">Đang tải...</div>
+      ) : (
+        <>
+          <DataTable columns={columns} data={customers} keyExtractor={(c) => c.account_id} />
+          {customers.length > pageSize && (
+            <Pagination currentPage={page} totalPages={Math.ceil(customers.length / pageSize)} onPageChange={setPage} totalItems={customers.length} pageSize={pageSize} />
+          )}
+        </>
       )}
 
       {/* View Modal */}
@@ -94,42 +162,41 @@ export default function CustomerManagement() {
         {selectedCustomer && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div><p className="text-sm text-gray-500">Họ tên</p><p className="font-medium">{selectedCustomer.name}</p></div>
-              <div><p className="text-sm text-gray-500">Email</p><p className="font-medium">{selectedCustomer.email}</p></div>
-              <div><p className="text-sm text-gray-500">Số điện thoại</p><p className="font-medium">{selectedCustomer.phone}</p></div>
+              <div><p className="text-sm text-gray-500">Username</p><p className="font-medium">{selectedCustomer.username}</p></div>
               <div><p className="text-sm text-gray-500">Trạng thái</p><StatusBadge status={selectedCustomer.status} /></div>
-              <div><p className="text-sm text-gray-500">Ngày tạo</p><p className="font-medium">{new Date(selectedCustomer.createdAt).toLocaleDateString('vi-VN')}</p></div>
+              {selectedCustomer.customer && (
+                <>
+                  <div><p className="text-sm text-gray-500">Họ tên</p><p className="font-medium">{selectedCustomer.customer.fullname || '-'}</p></div>
+                  <div><p className="text-sm text-gray-500">Email</p><p className="font-medium">{selectedCustomer.customer.email || '-'}</p></div>
+                  <div><p className="text-sm text-gray-500">Số điện thoại</p><p className="font-medium">{selectedCustomer.customer.phone_number || '-'}</p></div>
+                  <div><p className="text-sm text-gray-500">CCCD/CMND</p><p className="font-medium">{selectedCustomer.customer.id_number || '-'}</p></div>
+                </>
+              )}
+              <div><p className="text-sm text-gray-500">Ngày tạo</p><p className="font-medium">{new Date(selectedCustomer.created_at).toLocaleDateString('vi-VN')}</p></div>
             </div>
           </div>
         )}
       </Modal>
 
-      {/* Edit Modal */}
-      <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Chỉnh sửa khách hàng">
+      {/* Ban Modal */}
+      <Modal isOpen={isBanModalOpen} onClose={() => setIsBanModalOpen(false)} title="Cấm tài khoản">
         <div className="space-y-4">
+          <p className="text-gray-600">Bạn có chắc muốn cấm tài khoản <strong>{banTarget?.name || banTarget?.username}</strong>?</p>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
-            <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-            <input type="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-            <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="ACTIVE">Hoạt động</option>
-              <option value="INACTIVE">Không hoạt động</option>
-              <option value="BLOCKED">Đã khóa</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Lý do (tùy chọn)</label>
+            <textarea
+              value={banReason}
+              onChange={(e) => setBanReason(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
+              placeholder="Nhập lý do cấm tài khoản..."
+            />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <ActionButton onClick={() => setIsEditOpen(false)} variant="ghost" size="md">Hủy</ActionButton>
-            <ActionButton onClick={handleSave} variant="primary" size="md">Lưu thay đổi</ActionButton>
+            <ActionButton onClick={() => setIsBanModalOpen(false)} variant="ghost" size="md">Hủy</ActionButton>
+            <ActionButton onClick={handleBan} variant="danger" size="md" disabled={actionLoading}>
+              {actionLoading ? 'Đang xử lý...' : 'Cấm tài khoản'}
+            </ActionButton>
           </div>
         </div>
       </Modal>
