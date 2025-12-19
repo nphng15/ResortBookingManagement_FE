@@ -12,6 +12,7 @@ import CartPage from "../pages/Cart";
 import PaymentResult from "../pages/PaymentResult";
 import BookingHistoryPage from "../pages/BookingHistory";
 import AccessDenied from "../pages/AccessDenied";
+import ProfilePage from "../pages/Profile";
 
 function AppRoutes() {
   return (
@@ -25,6 +26,7 @@ function AppRoutes() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/payment-result" element={<PaymentResult />} />
           <Route path="/booking-history" element={<BookingHistoryPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
         {/* Auth Routes */}

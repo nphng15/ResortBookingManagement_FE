@@ -17,14 +17,32 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface CustomerInfo {
+  id: number;
+  fullname: string | null;
+  email: string | null;
+  phone_number: string | null;
+  id_number: string | null;
+}
+
+export interface PartnerInfo {
+  id: number;
+  name: string;
+  phone_number: string | null;
+  address: string | null;
+  banking_number: string | null;
+  bank: string | null;
+  balance: number;
+}
+
 export interface Account {
   account_id: number;
   username: string;
-  status: 'ACTIVE' | 'PENDING' | 'REJECTED' | 'INACTIVE';
+  status: 'ACTIVE' | 'PENDING' | 'REJECTED' | 'INACTIVE' | 'BANNED';
   created_at: string;
   roles: string[];
-  partner_id?: number; // ID của partner nếu role là PARTNER
-  customer_id?: number; // ID của customer nếu role là CUSTOMER
+  customer?: CustomerInfo;
+  partner?: PartnerInfo;
 }
 
 export interface RegisterResponse {

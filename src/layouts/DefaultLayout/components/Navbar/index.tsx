@@ -71,9 +71,9 @@ function Navbar() {
   const getAvatarLetter = () => user?.username?.charAt(0).toUpperCase() || '?';
 
   const settings = [
-    { name: 'Profile', action: () => { setUserMenuOpen(false); navigate('/profile'); } },
-    { name: 'Bookings', action: () => { setUserMenuOpen(false); navigate('/bookings'); } },
-    { name: 'Logout', action: handleLogout },
+    { name: 'Trang cá nhân', action: () => { setUserMenuOpen(false); navigate('/profile'); } },
+    { name: 'Lịch sử đặt phòng', action: () => { setUserMenuOpen(false); navigate('/booking-history'); } },
+    { name: 'Đăng xuất', action: handleLogout },
   ];
 
   return (
