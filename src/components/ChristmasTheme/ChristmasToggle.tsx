@@ -10,7 +10,7 @@ function ChristmasToggle() {
       title={isChristmasTheme ? 'Tắt giao diện Giáng sinh' : 'Bật giao diện Giáng sinh'}
       aria-label={isChristmasTheme ? 'Disable Christmas theme' : 'Enable Christmas theme'}
     >
-      {isChristmasTheme ? '🎁' : '️'}
+      {isChristmasTheme ? '🎁' : '️❄'}
     </button>
   );
 }

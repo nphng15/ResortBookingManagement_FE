@@ -23,7 +23,7 @@ function Snowfall() {
 
   // Initialize snowflakes
   const initSnowflakes = useCallback((width: number, height: number) => {
-    const count = 25; // Number of snowflakes
+    const count = 12; // Number of snowflakes
     const flakes: Snowflake[] = [];
 
     for (let i = 0; i < count; i++) {
