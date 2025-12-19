@@ -47,6 +47,7 @@ function AppRoutes() {
           <Route index element={<Navigate to="/partner/bookings" replace />} />
           <Route path="bookings" element={<BookingManagementPage />} />
           <Route path="revenue" element={<RevenueManagementPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </Router>
