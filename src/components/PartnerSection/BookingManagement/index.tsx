@@ -1,16 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useOutletContext } from 'react-router';
 import { CalendarDaysIcon, TableCellsIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { DateRangePicker, BookingCalendar, Modal } from '../components';
-import { fetchBookingSchedule, getCurrentWeekRange } from './api';
-import { getPartnerResorts, type PartnerResort } from '../../../services/partnerBookingService';
-import type { BookingSchedule } from './types';
-import type { Account } from '../../../services/authService';
-
-interface PartnerContext {
-  user: Account | null;
-  partnerId: number | undefined;
-}
+import { fetchBookingSchedule, fetchPartnerResorts, getCurrentWeekRange } from './api';
+import type { BookingSchedule, PartnerResort } from './types';
 
 const formatDateTime = (dateStr: string) => {
   return new Date(dateStr).toLocaleString('vi-VN');
@@ -23,8 +15,6 @@ const formatDateForInput = (date: Date) => {
 type ViewMode = 'calendar' | 'list';
 
 export default function BookingManagement() {
-  const { partnerId } = useOutletContext<PartnerContext>();
-
   const [bookings, setBookings] = useState<BookingSchedule[]>([]);
   const [resorts, setResorts] = useState<PartnerResort[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,27 +30,25 @@ export default function BookingManagement() {
 
   // Load danh sách resort của partner
   useEffect(() => {
-    if (!partnerId) return;
     const loadResorts = async () => {
       try {
-        const data = await getPartnerResorts(partnerId);
+        const data = await fetchPartnerResorts();
         setResorts(data);
       } catch (err) {
         console.error('Failed to fetch resorts:', err);
       }
     };
     loadResorts();
-  }, [partnerId]);
+  }, []);
 
   const loadData = useCallback(async () => {
-    if (!partnerId) return;
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchBookingSchedule(partnerId, {
-        start: `${startDate}T00:00:00`,
-        end: `${endDate}T23:59:59`,
-        resortId: selectedResortId,
+      const data = await fetchBookingSchedule({
+        start: startDate,
+        end: endDate,
+        resort_id: selectedResortId,
       });
       setBookings(data);
     } catch (err) {
@@ -70,11 +58,12 @@ export default function BookingManagement() {
     } finally {
       setIsLoading(false);
     }
-  }, [partnerId, startDate, endDate, selectedResortId]);
+  }, [startDate, endDate, selectedResortId]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
 
   const handleBookingClick = (booking: BookingSchedule) => {
     setSelectedBooking(booking);
@@ -156,6 +145,7 @@ export default function BookingManagement() {
         </div>
       )}
 
+
       {/* Content */}
       {isLoading ? (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
@@ -178,7 +168,7 @@ export default function BookingManagement() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {bookings.map((booking, i) => (
-                <tr key={i} onClick={() => handleBookingClick(booking)} className="hover:bg-gray-50 transition-colors cursor-pointer">
+                <tr key={`${booking.room_id}-${i}`} onClick={() => handleBookingClick(booking)} className="hover:bg-gray-50 transition-colors cursor-pointer">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{booking.room_number}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{booking.room_type}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{booking.resort_name}</td>

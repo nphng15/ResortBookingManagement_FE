@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { CalendarDaysIcon, CurrencyDollarIcon, ClipboardDocumentListIcon, WalletIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import { StatCard, Modal, ActionButton, WithdrawalChart } from '../components';
 import { fetchPartnerStatistics, requestWithdrawal } from './api';
-import type { PartnerStatistics } from './types';
+import type { PartnerStatistics, WithdrawalItem } from './types';
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -12,9 +12,20 @@ const formatDateTime = (dateStr: string) => {
   return new Date(dateStr).toLocaleString('vi-VN');
 };
 
+// Convert API withdrawal format to chart format
+const mapWithdrawalsForChart = (withdrawals: WithdrawalItem[]) => {
+  return withdrawals.map((w) => ({
+    id: w.id,
+    amount: w.amount,
+    date: w.time,
+    status: w.status,
+  }));
+};
+
 export default function RevenueManagement() {
   const [stats, setStats] = useState<PartnerStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -22,11 +33,14 @@ export default function RevenueManagement() {
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      const data = await fetchPartnerStatistics(1);
+      const data = await fetchPartnerStatistics();
       setStats(data);
-    } catch (error) {
-      console.error('Failed to fetch statistics:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Không thể tải dữ liệu';
+      setError(errorMessage);
+      console.error('Failed to fetch statistics:', err);
     } finally {
       setIsLoading(false);
     }
@@ -36,6 +50,7 @@ export default function RevenueManagement() {
     loadData();
   }, [loadData]);
 
+
   const handleWithdraw = async () => {
     const amount = parseFloat(withdrawAmount.replace(/[^0-9]/g, ''));
     if (isNaN(amount) || amount <= 0) {
@@ -43,23 +58,25 @@ export default function RevenueManagement() {
       return;
     }
 
+    if (amount < 1000000) {
+      setMessage({ type: 'error', text: 'Số tiền rút tối thiểu là 1.000.000 VND' });
+      return;
+    }
+
     setIsProcessing(true);
     setMessage(null);
     try {
-      const result = await requestWithdrawal(1, amount);
-      if (result.success) {
-        setMessage({ type: 'success', text: result.message });
-        setWithdrawAmount('');
-        setTimeout(() => {
-          setIsWithdrawOpen(false);
-          setMessage(null);
-          loadData();
-        }, 2000);
-      } else {
-        setMessage({ type: 'error', text: result.message });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Có lỗi xảy ra, vui lòng thử lại' });
+      const result = await requestWithdrawal(amount);
+      setMessage({ type: 'success', text: result.message });
+      setWithdrawAmount('');
+      setTimeout(() => {
+        setIsWithdrawOpen(false);
+        setMessage(null);
+        loadData(); // Reload data to update balance
+      }, 2000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra, vui lòng thử lại';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setIsProcessing(false);
     }
@@ -82,8 +99,21 @@ export default function RevenueManagement() {
     );
   }
 
-  if (!stats) return null;
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <p className="text-red-700 mb-4">{error}</p>
+        <button
+          onClick={loadData}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors cursor-pointer"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
 
+  if (!stats) return null;
 
   return (
     <div>
@@ -108,8 +138,9 @@ export default function RevenueManagement() {
 
       {/* Withdrawal Chart */}
       <div className="mb-8">
-        <WithdrawalChart withdrawals={stats.balance_movements.withdrawals} />
+        <WithdrawalChart withdrawals={mapWithdrawalsForChart(stats.balance_movements.withdrawals)} />
       </div>
+
 
       {/* Balance Movements */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -119,16 +150,20 @@ export default function RevenueManagement() {
             <ArrowUpIcon className="w-5 h-5 text-emerald-600" />
             <h2 className="font-semibold text-gray-900">Doanh thu gần đây</h2>
           </div>
-          <div className="divide-y divide-gray-100">
-            {stats.balance_movements.revenues.map((item) => (
-              <div key={item.id} className="px-6 py-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{item.description}</p>
-                  <p className="text-xs text-gray-500">{formatDateTime(item.date)}</p>
+          <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+            {stats.balance_movements.revenues.length === 0 ? (
+              <div className="px-6 py-8 text-center text-gray-500">Chưa có doanh thu</div>
+            ) : (
+              stats.balance_movements.revenues.map((item) => (
+                <div key={item.invoice_id} className="px-6 py-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Booking #{item.booking_detail_id}</p>
+                    <p className="text-xs text-gray-500">{formatDateTime(item.time)}</p>
+                  </div>
+                  <span className="text-sm font-semibold text-emerald-600">+{formatCurrency(item.amount)}</span>
                 </div>
-                <span className="text-sm font-semibold text-emerald-600">+{formatCurrency(item.amount)}</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -138,23 +173,27 @@ export default function RevenueManagement() {
             <ArrowDownIcon className="w-5 h-5 text-orange-600" />
             <h2 className="font-semibold text-gray-900">Lịch sử rút tiền</h2>
           </div>
-          <div className="divide-y divide-gray-100">
-            {stats.balance_movements.withdrawals.map((item) => (
-              <div key={item.id} className="px-6 py-4 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Rút tiền</p>
-                  <p className="text-xs text-gray-500">{formatDateTime(item.date)}</p>
+          <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+            {stats.balance_movements.withdrawals.length === 0 ? (
+              <div className="px-6 py-8 text-center text-gray-500">Chưa có lịch sử rút tiền</div>
+            ) : (
+              stats.balance_movements.withdrawals.map((item) => (
+                <div key={item.id} className="px-6 py-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Rút tiền #{item.id}</p>
+                    <p className="text-xs text-gray-500">{formatDateTime(item.time)}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-semibold text-orange-600">-{formatCurrency(item.amount)}</span>
+                    {item.status && (
+                      <p className={`text-xs mt-1 ${item.status === 'APPROVED' ? 'text-emerald-600' : item.status === 'PENDING' ? 'text-amber-600' : 'text-red-600'}`}>
+                        {item.status === 'APPROVED' ? 'Đã duyệt' : item.status === 'PENDING' ? 'Chờ duyệt' : 'Từ chối'}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-sm font-semibold text-orange-600">-{formatCurrency(item.amount)}</span>
-                  {item.status && (
-                    <p className={`text-xs mt-1 ${item.status === 'APPROVED' ? 'text-emerald-600' : item.status === 'PENDING' ? 'text-amber-600' : 'text-red-600'}`}>
-                      {item.status === 'APPROVED' ? 'Đã duyệt' : item.status === 'PENDING' ? 'Chờ duyệt' : 'Từ chối'}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -2,4 +2,5 @@
 export type {
   BookingSchedule,
   BookingFilters,
+  PartnerResort,
 } from '../../../services/partnerBookingService';
