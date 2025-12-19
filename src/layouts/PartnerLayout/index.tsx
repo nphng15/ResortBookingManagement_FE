@@ -135,7 +135,7 @@ export default function PartnerLayout() {
 
         {/* Page Content */}
         <div className="p-8">
-          <Outlet context={{ user, partnerId: user?.partner_id }} />
+          <Outlet context={{ user, partnerId: user?.partner?.id }} />
         </div>
       </main>
     </div>

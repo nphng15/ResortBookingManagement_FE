@@ -14,7 +14,7 @@ interface ResortCardProps {
   priceDiscounted: number;
 }
 
-function ResortCard({id, name, address, images, rating, reviews, priceOriginal, priceDiscounted}: ResortCardProps) {
+function ResortCard({id, name, address, images, rating, reviews: _reviews, priceOriginal, priceDiscounted}: ResortCardProps) {
   const navigate = useNavigate();
   const { isChristmasTheme } = useChristmasTheme();
 

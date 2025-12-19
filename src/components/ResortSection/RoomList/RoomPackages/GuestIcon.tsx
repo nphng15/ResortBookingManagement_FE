@@ -26,7 +26,7 @@ interface RoomGuestInfoProps {
   allowsChildren: boolean;
 }
 
-function GuestIcon({ guestCount, allowsChildren }: RoomGuestInfoProps) {
+function GuestIcon({ guestCount, allowsChildren: _allowsChildren }: RoomGuestInfoProps) {
   return (
     <div className={styles.container}>
       <div className={styles.guestSection}>

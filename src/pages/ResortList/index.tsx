@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { MapPin, SlidersHorizontal, Grid3X3, List, SearchX } from 'lucide-react';
+import { MapPin, SearchX } from 'lucide-react';
 import ResortCard from '../../components/ResortSection/ResortCard';
 import ResortCardSkeleton from '../../components/ResortSection/ResortCard/ResortCardSkeleton';
 import ResortFilter from '../../components/ResortSection/Filter';
@@ -13,7 +13,6 @@ function ResortList() {
   const [resorts, setResorts] = useState<Resort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showMobileFilter, setShowMobileFilter] = useState(false);
   const { isChristmasTheme } = useChristmasTheme();
 
   useEffect(() => {

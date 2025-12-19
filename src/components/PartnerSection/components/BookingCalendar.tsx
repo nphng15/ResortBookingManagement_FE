@@ -1,4 +1,10 @@
-import type { BookingSchedule } from '../BookingManagement/types';
+interface BookingSchedule {
+  room_id: number;
+  room_type: string;
+  room_number: string;
+  started_time: string;
+  finished_time: string;
+}
 
 interface BookingCalendarProps {
   bookings: BookingSchedule[];

@@ -1,4 +1,3 @@
-import React from 'react'
 import styles from './RoomOptions.module.css'
 
 // Interface (hợp đồng) quy định component này nhận prop 'options'

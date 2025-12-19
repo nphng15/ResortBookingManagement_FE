@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import styles from './RoomImagePreview.module.css'
-function RoomImagePreview({ images }: { images: string[] }) {
+function RoomImagePreview({ images: _images }: { images: string[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   
   // Giả sử đây là danh sách ảnh bạn lấy được từ API hoặc fix cứng

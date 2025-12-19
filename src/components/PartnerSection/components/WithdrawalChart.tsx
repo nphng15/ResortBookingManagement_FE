@@ -1,5 +1,9 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import type { BalanceMovement } from '../RevenueManagement/types';
+
+interface BalanceMovement {
+  date: string;
+  amount: number;
+}
 
 interface WithdrawalChartProps {
   withdrawals: BalanceMovement[];
