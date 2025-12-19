@@ -12,7 +12,7 @@ function BookingHistorySection() {
     const fetchUser = async () => {
       try {
         const user = await getCurrentUser();
-        setCustomerId(user.account_id);
+        setCustomerId(user.customer?.id ?? null);
       } catch {
         setCustomerId(null);
       } finally {
