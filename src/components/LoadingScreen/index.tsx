@@ -26,8 +26,9 @@ export default function LoadingScreen({ onReady }: LoadingScreenProps) {
     const pingServer = async () => {
       const baseUrl = import.meta.env.VITE_BASE_URL || '';
       try {
-        await fetch(`${baseUrl}/`);
-        // Server đã ready
+        // Dùng no-cors để bypass CORS block, chỉ cần biết request hoàn thành
+        await fetch(`${baseUrl}/`, { mode: 'no-cors' });
+        // Server đã ready (request hoàn thành = server đã wake up)
         if (isMounted) {
           clearInterval(progressInterval);
           setProgress(100);
