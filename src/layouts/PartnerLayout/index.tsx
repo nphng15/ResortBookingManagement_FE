@@ -31,7 +31,7 @@ export default function PartnerLayout() {
       try {
         const userData = await getCurrentUser();
         if (!userData.roles.includes('PARTNER')) {
-          navigate('/');
+          navigate('/access-denied');
           return;
         }
         setUser(userData);

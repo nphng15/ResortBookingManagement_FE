@@ -11,6 +11,7 @@ import AuthPage from "../pages/Auth";
 import CartPage from "../pages/Cart";
 import PaymentResult from "../pages/PaymentResult";
 import BookingHistoryPage from "../pages/BookingHistory";
+import AccessDenied from "../pages/AccessDenied";
 
 function AppRoutes() {
   return (
@@ -28,6 +29,7 @@ function AppRoutes() {
 
         {/* Auth Routes */}
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/access-denied" element={<AccessDenied />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
