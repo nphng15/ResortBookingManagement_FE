@@ -1,6 +1,5 @@
 import { getToken } from './authService';
-
-const API_BASE_URL = '/api/v1';
+import { API_BASE_URL } from '../config/api';
 
 export interface PaymentRequest {
   customer_id: number;

@@ -1,6 +1,7 @@
 import { getToken } from './authService';
+import { API_BASE_URL } from '../config/api';
 
-const API_BASE_URL = '/api/v1/zalopay';
+const ZALOPAY_URL = `${API_BASE_URL}/zalopay`;
 
 // Request tạo đơn thanh toán
 export interface CreatePaymentRequest {
@@ -36,7 +37,7 @@ export const createZaloPayOrder = async (data: CreatePaymentRequest): Promise<Cr
   const token = getToken();
   if (!token) throw new Error('Vui lòng đăng nhập để thanh toán');
 
-  const response = await fetch(`${API_BASE_URL}/create`, {
+  const response = await fetch(`${ZALOPAY_URL}/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -58,7 +59,7 @@ export const queryZaloPayStatus = async (appTransId: string): Promise<QueryPayme
   const token = getToken();
   if (!token) throw new Error('Vui lòng đăng nhập');
 
-  const response = await fetch(`${API_BASE_URL}/query`, {
+  const response = await fetch(`${ZALOPAY_URL}/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
