@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CalendarDaysIcon, TableCellsIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { DateRangePicker, BookingCalendar, Modal } from '../components';
-import { fetchBookingSchedule, fetchPartnerResorts, getCurrentWeekRange } from './api';
-import type { BookingSchedule, PartnerResort } from './types';
+import { getPartnerBookingSchedule, getPartnerResorts, getCurrentWeekRange, type BookingSchedule, type PartnerResort } from '../../../services/partnerService';
 
 const formatDateTime = (dateStr: string) => {
   return new Date(dateStr).toLocaleString('vi-VN');
@@ -28,11 +27,10 @@ export default function BookingManagement() {
   const [startDate, setStartDate] = useState(formatDateForInput(weekRange.start));
   const [endDate, setEndDate] = useState(formatDateForInput(weekRange.end));
 
-  // Load danh sách resort của partner
   useEffect(() => {
     const loadResorts = async () => {
       try {
-        const data = await fetchPartnerResorts();
+        const data = await getPartnerResorts();
         setResorts(data);
       } catch (err) {
         console.error('Failed to fetch resorts:', err);
@@ -45,7 +43,7 @@ export default function BookingManagement() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchBookingSchedule({
+      const data = await getPartnerBookingSchedule({
         start: startDate,
         end: endDate,
         resort_id: selectedResortId,
@@ -54,7 +52,6 @@ export default function BookingManagement() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Không thể tải dữ liệu';
       setError(message);
-      console.error('Failed to fetch bookings:', err);
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +60,6 @@ export default function BookingManagement() {
   useEffect(() => {
     loadData();
   }, [loadData]);
-
 
   const handleBookingClick = (booking: BookingSchedule) => {
     setSelectedBooking(booking);
@@ -84,6 +80,7 @@ export default function BookingManagement() {
     const value = e.target.value;
     setSelectedResortId(value ? Number(value) : undefined);
   };
+
 
   return (
     <div>
@@ -116,9 +113,7 @@ export default function BookingManagement() {
             <ChevronRightIcon className="w-5 h-5" />
           </button>
         </div>
-
         <div className="flex items-center gap-3">
-          {/* Resort Filter */}
           <select
             value={selectedResortId ?? ''}
             onChange={handleResortChange}
@@ -126,27 +121,19 @@ export default function BookingManagement() {
           >
             <option value="">Tất cả resort</option>
             {resorts.map((resort) => (
-              <option key={resort.id} value={resort.id}>
-                {resort.name}
-              </option>
+              <option key={resort.id} value={resort.id}>{resort.name}</option>
             ))}
           </select>
-
           <button onClick={loadData} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors cursor-pointer">
             Tải lại
           </button>
         </div>
       </div>
 
-      {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-          {error}
-        </div>
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
       )}
 
-
-      {/* Content */}
       {isLoading ? (
         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
           <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mx-auto mb-4" />
@@ -177,16 +164,13 @@ export default function BookingManagement() {
                 </tr>
               ))}
               {bookings.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">Không có đặt phòng trong khoảng thời gian này</td>
-                </tr>
+                <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-500">Không có đặt phòng trong khoảng thời gian này</td></tr>
               )}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Detail Modal */}
       <Modal isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} title="Chi tiết đặt phòng">
         {selectedBooking && (
           <div className="space-y-4">

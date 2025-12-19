@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CalendarDaysIcon, CurrencyDollarIcon, ClipboardDocumentListIcon, WalletIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 import { StatCard, Modal, ActionButton, WithdrawalChart } from '../components';
-import { fetchPartnerStatistics, requestWithdrawal } from './api';
-import type { PartnerStatistics, WithdrawalItem } from './types';
+import { getPartnerStatistics, requestWithdrawal, type PartnerStatistics, type WithdrawalItem } from '../../../services/partnerService';
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -35,12 +34,11 @@ export default function RevenueManagement() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchPartnerStatistics();
+      const data = await getPartnerStatistics();
       setStats(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Không thể tải dữ liệu';
       setError(errorMessage);
-      console.error('Failed to fetch statistics:', err);
     } finally {
       setIsLoading(false);
     }
@@ -50,14 +48,12 @@ export default function RevenueManagement() {
     loadData();
   }, [loadData]);
 
-
   const handleWithdraw = async () => {
     const amount = parseFloat(withdrawAmount.replace(/[^0-9]/g, ''));
     if (isNaN(amount) || amount <= 0) {
       setMessage({ type: 'error', text: 'Vui lòng nhập số tiền hợp lệ' });
       return;
     }
-
     if (amount < 1000000) {
       setMessage({ type: 'error', text: 'Số tiền rút tối thiểu là 1.000.000 VND' });
       return;
@@ -72,15 +68,16 @@ export default function RevenueManagement() {
       setTimeout(() => {
         setIsWithdrawOpen(false);
         setMessage(null);
-        loadData(); // Reload data to update balance
+        loadData();
       }, 2000);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra, vui lòng thử lại';
+      const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setMessage({ type: 'error', text: errorMessage });
     } finally {
       setIsProcessing(false);
     }
   };
+
 
   const handleAmountChange = (value: string) => {
     const numericValue = value.replace(/[^0-9]/g, '');
@@ -103,10 +100,7 @@ export default function RevenueManagement() {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
         <p className="text-red-700 mb-4">{error}</p>
-        <button
-          onClick={loadData}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors cursor-pointer"
-        >
+        <button onClick={loadData} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors cursor-pointer">
           Thử lại
         </button>
       </div>
@@ -141,7 +135,6 @@ export default function RevenueManagement() {
         <WithdrawalChart withdrawals={mapWithdrawalsForChart(stats.balance_movements.withdrawals)} />
       </div>
 
-
       {/* Balance Movements */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenues */}
@@ -166,6 +159,7 @@ export default function RevenueManagement() {
             )}
           </div>
         </div>
+
 
         {/* Withdrawals */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -205,7 +199,6 @@ export default function RevenueManagement() {
             <p className="text-sm text-gray-500">Số dư khả dụng</p>
             <p className="text-2xl font-bold text-emerald-600">{formatCurrency(stats.current_balance)}</p>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Số tiền muốn rút (VND)</label>
             <input
@@ -217,13 +210,11 @@ export default function RevenueManagement() {
             />
             <p className="text-xs text-gray-500 mt-1">Số tiền rút tối thiểu: 1.000.000 VND</p>
           </div>
-
           {message && (
             <div className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
               {message.text}
             </div>
           )}
-
           <div className="flex justify-end gap-3 pt-4">
             <ActionButton onClick={() => { setIsWithdrawOpen(false); setMessage(null); }} variant="ghost" size="md">Hủy</ActionButton>
             <ActionButton onClick={handleWithdraw} variant="primary" size="md" disabled={isProcessing || !withdrawAmount}>
