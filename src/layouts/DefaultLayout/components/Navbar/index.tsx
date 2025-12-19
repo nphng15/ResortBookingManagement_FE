@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { getToken, getCurrentUser, logout } from '../../../../services/authService';
 import type { Account } from '../../../../services/authService';
+import { useChristmasTheme } from '../../../../components/ChristmasTheme';
 
 const pages = [
   { name: 'Partnership', path: '/partnership' },
@@ -11,6 +12,7 @@ const pages = [
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isChristmasTheme } = useChristmasTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [user, setUser] = React.useState<Account | null>(null);
@@ -80,18 +82,26 @@ function Navbar() {
     <nav className={`${isHomepage ? 'fixed' : 'relative'} top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isTransparent 
         ? 'bg-transparent' 
-        : 'bg-white/95 backdrop-blur-md shadow-lg'
+        : isChristmasTheme
+          ? 'christmas-navbar shadow-lg'
+          : 'bg-white/95 backdrop-blur-md shadow-lg'
     }`}>
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <svg className={`w-8 h-8 transition-colors ${isTransparent ? 'text-white' : 'text-violet-600'}`} viewBox="0 0 24 24" fill="currentColor">
+          {/* Logo with Santa Hat when Christmas theme is active */}
+          <Link to="/" className="flex items-center gap-2 group relative">
+            {isChristmasTheme && (
+              <span className="absolute -top-3 -left-1 text-2xl santa-hat" aria-hidden="true">🎅</span>
+            )}
+            <svg className={`w-8 h-8 transition-colors ${isTransparent ? 'text-white' : isChristmasTheme ? 'text-red-500' : 'text-violet-600'}`} viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
-            <span className={`text-xl font-bold tracking-wider transition-colors ${isTransparent ? 'text-white' : 'text-slate-900'}`}>
+            <span className={`text-xl font-bold tracking-wider transition-colors ${isTransparent ? 'text-white' : isChristmasTheme ? 'text-white' : 'text-slate-900'}`}>
               Dlegent
             </span>
+            {isChristmasTheme && !isTransparent && (
+              <span className="ml-1 text-lg" aria-hidden="true"></span>
+            )}
           </Link>
 
           {/* Desktop Navigation */}
@@ -103,7 +113,9 @@ function Navbar() {
                 className={`px-4 py-2 font-medium rounded-lg transition-all cursor-pointer ${
                   isTransparent
                     ? 'text-white/90 hover:text-white hover:bg-white/10'
-                    : 'text-slate-700 hover:text-violet-600 hover:bg-violet-50'
+                    : isChristmasTheme
+                      ? 'text-white hover:text-yellow-300 hover:bg-white/10'
+                      : 'text-slate-700 hover:text-violet-600 hover:bg-violet-50'
                 }`}
               >
                 {page.name}
@@ -135,7 +147,11 @@ function Navbar() {
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white transition-all cursor-pointer ${
-                      isTransparent ? 'bg-white/20 hover:bg-white/30' : 'bg-violet-600 hover:bg-violet-700'
+                      isTransparent 
+                        ? 'bg-white/20 hover:bg-white/30' 
+                        : isChristmasTheme 
+                          ? 'bg-red-600 hover:bg-red-700 christmas-glow'
+                          : 'bg-violet-600 hover:bg-violet-700'
                     }`}
                   >
                     {getAvatarLetter()}
@@ -167,7 +183,9 @@ function Navbar() {
                   className={`px-5 py-2 font-semibold rounded-full transition-all cursor-pointer ${
                     isTransparent
                       ? 'text-white border-2 border-white/50 hover:bg-white/10'
-                      : 'text-violet-600 border-2 border-violet-200 hover:border-violet-400 hover:bg-violet-50'
+                      : isChristmasTheme
+                        ? 'text-white border-2 border-yellow-400/70 hover:border-yellow-300 hover:bg-white/10'
+                        : 'text-violet-600 border-2 border-violet-200 hover:border-violet-400 hover:bg-violet-50'
                   }`}
                 >
                   Đăng nhập
@@ -177,7 +195,9 @@ function Navbar() {
                   className={`px-5 py-2 font-semibold rounded-full transition-all cursor-pointer ${
                     isTransparent
                       ? 'bg-white text-slate-900 hover:bg-white/90'
-                      : 'bg-gradient-to-r from-violet-600 to-cyan-600 text-white hover:shadow-lg hover:-translate-y-0.5'
+                      : isChristmasTheme
+                        ? 'bg-gradient-to-r from-red-600 to-green-700 text-white hover:shadow-lg hover:-translate-y-0.5 christmas-glow'
+                        : 'bg-gradient-to-r from-violet-600 to-cyan-600 text-white hover:shadow-lg hover:-translate-y-0.5'
                   }`}
                 >
                   Đăng ký

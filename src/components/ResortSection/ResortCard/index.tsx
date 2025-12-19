@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router';
 import CardImagePreview from './CardImagePreview';
 import { Star, MapPin, Sparkles, BadgeCheck, Heart } from 'lucide-react'; 
+import { useChristmasTheme } from '../../../components/ChristmasTheme';
 
 interface ResortCardProps {
   id: number;
@@ -15,6 +16,7 @@ interface ResortCardProps {
 
 function ResortCard({id, name, address, images, rating, reviews, priceOriginal, priceDiscounted}: ResortCardProps) {
   const navigate = useNavigate();
+  const { isChristmasTheme } = useChristmasTheme();
 
   const handleCardClick = () => {
     navigate(`/resort/${id}`);
@@ -32,7 +34,11 @@ function ResortCard({id, name, address, images, rating, reviews, priceOriginal, 
   return (
     <div 
       onClick={handleCardClick}
-      className="group relative flex bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-200 transition-all duration-300 cursor-pointer overflow-hidden"
+      className={`group relative flex rounded-2xl border shadow-sm transition-all duration-300 cursor-pointer overflow-hidden ${
+        isChristmasTheme 
+          ? 'bg-gradient-to-r from-white to-red-50/50 border-red-200/80 hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300'
+          : 'bg-white border-slate-200/80 hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-200'
+      }`}
     >
       {/* Left: Image */}
       <div className="relative w-[280px] flex-shrink-0">
@@ -41,16 +47,13 @@ function ResortCard({id, name, address, images, rating, reviews, priceOriginal, 
         {/* Favorite Button */}
         <button 
           onClick={(e) => { e.stopPropagation(); }}
-          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"
+          className={`absolute top-3 right-3 w-9 h-9 rounded-full backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-200 ${
+            isChristmasTheme ? 'bg-white/95 hover:bg-white' : 'bg-white/90 hover:bg-white'
+          }`}
         >
-          <Heart size={18} className="text-slate-400 hover:text-red-500 transition-colors" />
+          <Heart size={18} className={`transition-colors ${isChristmasTheme ? 'text-red-400 hover:text-red-600' : 'text-slate-400 hover:text-red-500'}`} />
         </button>
 
-        {/* Badge */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium shadow-lg">
-          <Sparkles size={12} />
-          <span>Được yêu thích</span>
-        </div>
       </div>
 
       {/* Middle: Info */}
@@ -60,7 +63,11 @@ function ResortCard({id, name, address, images, rating, reviews, priceOriginal, 
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               {/* Resort Name */}
-              <h3 className="text-lg font-semibold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">
+              <h3 className={`text-lg font-semibold transition-colors line-clamp-1 ${
+                isChristmasTheme 
+                  ? 'text-red-800 group-hover:text-red-600'
+                  : 'text-slate-800 group-hover:text-blue-600'
+              }`}>
                 {name}
               </h3>
 
@@ -68,14 +75,14 @@ function ResortCard({id, name, address, images, rating, reviews, priceOriginal, 
               <div className="flex items-center gap-2 mt-1.5">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} className="text-amber-400 fill-amber-400" />
+                    <Star key={i} size={14} className={`fill-current ${isChristmasTheme ? 'text-yellow-500' : 'text-amber-400'}`} />
                   ))}
                 </div>
-                <span className="text-xs text-slate-400">Resort</span>
+                <span className={`text-xs ${isChristmasTheme ? 'text-green-600' : 'text-slate-400'}`}>Resort</span>
               </div>
 
               {/* Address */}
-              <div className="flex items-center gap-1.5 mt-2 text-slate-500">
+              <div className={`flex items-center gap-1.5 mt-2 ${isChristmasTheme ? 'text-green-700' : 'text-slate-500'}`}>
                 <MapPin size={14} className="flex-shrink-0" />
                 <span className="text-sm line-clamp-1">{address}</span>
               </div>
@@ -85,10 +92,14 @@ function ResortCard({id, name, address, images, rating, reviews, priceOriginal, 
             <div className="flex flex-col items-end flex-shrink-0">
               <div className="flex items-center gap-2">
                 <div className="text-right">
-                  <p className="text-xs text-slate-500">{getRatingLabel(displayRating)}</p>
-                  <p className="text-xs text-slate-400">1.2K đánh giá</p>
+                  <p className={`text-xs ${isChristmasTheme ? 'text-green-600' : 'text-slate-500'}`}>{getRatingLabel(displayRating)}</p>
+                  <p className={`text-xs ${isChristmasTheme ? 'text-red-400' : 'text-slate-400'}`}>1.2K đánh giá</p>
                 </div>
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/25">
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold shadow-lg ${
+                  isChristmasTheme 
+                    ? 'bg-gradient-to-br from-red-600 to-green-700 shadow-red-500/25'
+                    : 'bg-gradient-to-br from-blue-600 to-indigo-600 shadow-blue-500/25'
+                }`}>
                   {displayRating.toFixed(1)}
                 </div>
               </div>
@@ -97,39 +108,57 @@ function ResortCard({id, name, address, images, rating, reviews, priceOriginal, 
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mt-4">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-medium">
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${
+              isChristmasTheme 
+                ? 'bg-green-100 text-green-800'
+                : 'bg-emerald-50 text-emerald-700'
+            }`}>
               <BadgeCheck size={12} />
-              Miễn phí hủy phòng
+              {isChristmasTheme ? ' Miễn phí hủy' : 'Miễn phí hủy phòng'}
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-medium">
-              <Sparkles size={12} />
-              Giảm đến 200K
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${
+              isChristmasTheme 
+                ? 'bg-red-100 text-red-700'
+                : 'bg-blue-50 text-blue-700'
+            }`}>
+              {isChristmasTheme ? '' : <Sparkles size={12} />}
+              {isChristmasTheme ? 'Giảm Noel 30%' : 'Giảm đến 200K'}
             </span>
           </div>
         </div>
       </div>
 
       {/* Right: Price */}
-      <div className="w-[200px] p-5 bg-gradient-to-br from-slate-50 to-blue-50/50 border-l border-slate-100 flex flex-col justify-center">
+      <div className={`w-[200px] p-5 border-l flex flex-col justify-center ${
+        isChristmasTheme 
+          ? 'bg-gradient-to-br from-red-50 to-green-50/50 border-red-100'
+          : 'bg-gradient-to-br from-slate-50 to-blue-50/50 border-slate-100'
+      }`}>
         <div className="text-right">
-          <p className="text-xs text-slate-500 mb-1">Giá mỗi đêm từ</p>
+          <p className={`text-xs mb-1 ${isChristmasTheme ? 'text-green-600' : 'text-slate-500'}`}>
+            {isChristmasTheme ? ' Giá Giáng sinh từ' : 'Giá mỗi đêm từ'}
+          </p>
           {priceOriginal > priceDiscounted && (
-            <p className="text-sm text-slate-400 line-through">
+            <p className={`text-sm line-through ${isChristmasTheme ? 'text-red-300' : 'text-slate-400'}`}>
               {priceOriginal.toLocaleString('vi-VN')}đ
             </p>
           )}
-          <p className="text-2xl font-bold text-slate-800">
+          <p className={`text-2xl font-bold ${isChristmasTheme ? 'text-red-700' : 'text-slate-800'}`}>
             {priceDiscounted.toLocaleString('vi-VN')}
-            <span className="text-sm font-normal text-slate-500">đ</span>
+            <span className={`text-sm font-normal ${isChristmasTheme ? 'text-green-600' : 'text-slate-500'}`}>đ</span>
           </p>
-          <p className="text-xs text-slate-400 mt-0.5">Đã bao gồm thuế & phí</p>
+          <p className={`text-xs mt-0.5 ${isChristmasTheme ? 'text-green-500' : 'text-slate-400'}`}>Đã bao gồm thuế & phí</p>
         </div>
 
         <button 
           onClick={(e) => { e.stopPropagation(); navigate(`/resort/${id}`); }}
-          className="mt-4 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200"
+          className={`mt-4 w-full py-2.5 px-4 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-200 ${
+            isChristmasTheme 
+              ? 'bg-gradient-to-r from-red-600 to-green-700 hover:from-red-700 hover:to-green-800 shadow-red-500/25 hover:shadow-red-500/40'
+              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/25 hover:shadow-blue-500/40'
+          }`}
         >
-          Chọn phòng
+          {isChristmasTheme ? ' Chọn phòng' : 'Chọn phòng'}
         </button>
       </div>
     </div>
@@ -137,3 +166,4 @@ function ResortCard({id, name, address, images, rating, reviews, priceOriginal, 
 }
 
 export default ResortCard
+

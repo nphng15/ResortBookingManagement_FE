@@ -1,0 +1,528 @@
+/* Christmas Theme - CSS Variables & Animations */
+/* This file contains all Christmas-specific styles */
+/* To remove: delete this folder and remove imports from App.tsx */
+
+:root {
+  /* Christmas Color Palette */
+  --christmas-red: #C41E3A;
+  --christmas-red-deep: #8B0000;
+  --christmas-green: #165B33;
+  --christmas-green-dark: #0D3B21;
+  --christmas-gold: #FFD700;
+  --christmas-gold-warm: #DAA520;
+  --christmas-snow: #FFFFFF;
+  --christmas-ice: #A5D8FF;
+  --christmas-cream: #FFF8DC;
+}
+
+/* Christmas Gradient Overrides */
+.christmas-gradient-primary {
+  background: linear-gradient(135deg, var(--christmas-red) 0%, var(--christmas-red-deep) 100%) !important;
+}
+
+.christmas-gradient-secondary {
+  background: linear-gradient(135deg, var(--christmas-green) 0%, var(--christmas-green-dark) 100%) !important;
+}
+
+.christmas-gradient-festive {
+  background: linear-gradient(135deg, var(--christmas-red) 0%, var(--christmas-green) 50%, var(--christmas-red-deep) 100%) !important;
+}
+
+.christmas-gradient-cta {
+  background: linear-gradient(135deg, var(--christmas-red) 0%, var(--christmas-green-dark) 50%, var(--christmas-red-deep) 100%) !important;
+}
+
+/* Christmas Text Colors */
+.christmas-text-red {
+  color: var(--christmas-red) !important;
+}
+
+.christmas-text-green {
+  color: var(--christmas-green) !important;
+}
+
+.christmas-text-gold {
+  color: var(--christmas-gold) !important;
+}
+
+/* Christmas Glow Effects */
+.christmas-glow {
+  box-shadow: 0 0 20px rgba(196, 30, 58, 0.3), 0 0 40px rgba(22, 91, 51, 0.2);
+}
+
+.christmas-glow-gold {
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+/* Snowflake Animation */
+@keyframes snowfall-drop {
+  0% {
+    top: -50px;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    top: 100vh;
+    opacity: 0;
+  }
+}
+
+@keyframes snowfall-sway {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(15px) rotate(90deg);
+  }
+  50% {
+    transform: translateX(-10px) rotate(180deg);
+  }
+  75% {
+    transform: translateX(20px) rotate(270deg);
+  }
+}
+
+@keyframes snowfall-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Snowfall Container - Fixed above content for visibility */
+.snowfall-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50; /* Above most content but below modals */
+  overflow: hidden;
+}
+
+/* Snowfall Canvas - High performance version */
+.snowfall-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Snowflake Image Style - Falling animation */
+.snowflake-img {
+  position: absolute;
+  top: -50px;
+  animation: 
+    snowfall-drop linear infinite,
+    snowfall-sway ease-in-out infinite;
+  animation-timing-function: linear, ease-in-out;
+  pointer-events: none;
+  user-select: none;
+  filter: 
+    drop-shadow(0 0 12px rgba(255, 255, 255, 1)) 
+    drop-shadow(0 0 6px rgba(200, 230, 255, 1))
+    drop-shadow(0 0 20px rgba(150, 200, 255, 0.6))
+    brightness(1.2);
+  will-change: top, transform, opacity;
+}
+
+/* Legacy snowflake class (deprecated) */
+.snowflake {
+  position: fixed;
+  top: -10vh;
+  color: white;
+  font-size: 1rem;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+  animation: snowfall-drop 10s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+.snowflake::after {
+  content: '';
+}
+
+
+
+
+/* Christmas Button Styles */
+.christmas-btn-primary {
+  background: linear-gradient(135deg, var(--christmas-red) 0%, var(--christmas-red-deep) 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.christmas-btn-primary:hover {
+  background: linear-gradient(135deg, var(--christmas-red-deep) 0%, var(--christmas-red) 100%) !important;
+  box-shadow: 0 4px 20px rgba(196, 30, 58, 0.4);
+}
+
+.christmas-btn-secondary {
+  background: linear-gradient(135deg, var(--christmas-green) 0%, var(--christmas-green-dark) 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.christmas-btn-secondary:hover {
+  background: linear-gradient(135deg, var(--christmas-green-dark) 0%, var(--christmas-green) 100%) !important;
+  box-shadow: 0 4px 20px rgba(22, 91, 51, 0.4);
+}
+
+/* Christmas Border Accents */
+.christmas-border {
+  border-color: var(--christmas-red) !important;
+}
+
+.christmas-border-gold {
+  border-color: var(--christmas-gold) !important;
+}
+
+/* Santa Hat Animation */
+@keyframes santa-hat-bounce {
+  0%, 100% {
+    transform: rotate(-15deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-15deg) translateY(-3px);
+  }
+}
+
+.santa-hat {
+  animation: santa-hat-bounce 2s ease-in-out infinite;
+}
+
+/* Christmas Toggle Button */
+.christmas-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--christmas-red) 0%, var(--christmas-green) 100%);
+  border: 3px solid var(--christmas-gold);
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.christmas-toggle-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(196, 30, 58, 0.5);
+}
+
+.christmas-toggle-btn.inactive {
+  background: linear-gradient(135deg, #6b7280 0%, #374151 100%);
+  border-color: #9ca3af;
+}
+
+/* Christmas Navbar Styles */
+.christmas-navbar {
+  background: linear-gradient(135deg, rgba(196, 30, 58, 0.95) 0%, rgba(22, 91, 51, 0.95) 100%) !important;
+  backdrop-filter: blur(12px);
+}
+
+.christmas-navbar-transparent {
+  background: transparent !important;
+}
+
+/* Christmas Footer Styles */
+.christmas-footer {
+  background: linear-gradient(135deg, var(--christmas-green-dark) 0%, var(--christmas-red-deep) 100%) !important;
+}
+
+/* Ornament Animation */
+@keyframes ornament-swing {
+  0%, 100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+.christmas-ornament {
+  animation: ornament-swing 3s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+/* Lights Animation */
+@keyframes christmas-lights {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.christmas-light {
+  animation: christmas-lights 1.5s ease-in-out infinite;
+}
+
+.christmas-light:nth-child(odd) {
+  animation-delay: 0.75s;
+}
+
+/* Christmas Card Styles */
+.christmas-card {
+  border: 2px solid rgba(196, 30, 58, 0.3);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 248, 220, 0.95) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.christmas-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--christmas-red) 0px,
+    var(--christmas-red) 10px,
+    var(--christmas-green) 10px,
+    var(--christmas-green) 20px
+  );
+}
+
+.christmas-card:hover {
+  border-color: var(--christmas-gold);
+  box-shadow: 0 8px 30px rgba(196, 30, 58, 0.25), 0 0 20px rgba(255, 215, 0, 0.15);
+}
+
+/* Christmas Feature Card */
+.christmas-feature-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 248, 220, 0.95) 100%);
+  border: 2px solid rgba(196, 30, 58, 0.2);
+  position: relative;
+}
+
+.christmas-feature-card::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 14px;
+  opacity: 0.5;
+  color: var(--christmas-ice);
+}
+
+.christmas-feature-card:hover {
+  border-color: var(--christmas-gold);
+}
+
+/* Christmas Destination Card Overlay */
+.christmas-destination-overlay {
+  background: linear-gradient(to top, rgba(139, 0, 0, 0.9) 0%, rgba(22, 91, 51, 0.5) 40%, transparent 100%) !important;
+}
+
+/* Christmas Section Backgrounds */
+.christmas-section-light {
+  background: linear-gradient(180deg, #fff8f8 0%, #f8fff8 50%, #fff8f8 100%);
+  position: relative;
+}
+
+.christmas-section-light::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--christmas-red) 0px,
+    var(--christmas-red) 20px,
+    var(--christmas-green) 20px,
+    var(--christmas-green) 40px,
+    var(--christmas-gold) 40px,
+    var(--christmas-gold) 60px
+  );
+}
+
+/* Christmas Hero Overlay */
+.christmas-hero-overlay {
+  background: linear-gradient(to bottom, 
+    rgba(139, 0, 0, 0.4) 0%, 
+    rgba(22, 91, 51, 0.3) 50%, 
+    rgba(139, 0, 0, 0.5) 100%) !important;
+}
+
+/* Christmas Aurora Effects */
+.christmas-aurora-1 {
+  background-color: rgba(196, 30, 58, 0.25) !important;
+}
+
+.christmas-aurora-2 {
+  background-color: rgba(22, 91, 51, 0.25) !important;
+}
+
+.christmas-aurora-3 {
+  background-color: rgba(255, 215, 0, 0.15) !important;
+}
+
+/* Christmas Badge */
+.christmas-badge {
+  background: linear-gradient(135deg, rgba(196, 30, 58, 0.15) 0%, rgba(22, 91, 51, 0.15) 100%) !important;
+  color: var(--christmas-red) !important;
+  border: 1px solid rgba(196, 30, 58, 0.3);
+}
+
+/* Christmas Gradient Text */
+.christmas-gradient-text {
+  background: linear-gradient(135deg, var(--christmas-red) 0%, var(--christmas-green) 50%, var(--christmas-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Christmas Icon Gradient */
+.christmas-icon-gradient {
+  background: linear-gradient(135deg, var(--christmas-red) 0%, var(--christmas-red-deep) 100%) !important;
+}
+
+/* Christmas Bottom Fade */
+.christmas-bottom-fade {
+  background: linear-gradient(to top, #fff8f8 0%, transparent 100%) !important;
+}
+
+/* Christmas Card Corner Decorations */
+.christmas-corner-decoration {
+  position: relative;
+}
+
+.christmas-corner-decoration::before,
+.christmas-corner-decoration::after {
+  position: absolute;
+  font-size: 16px;
+  opacity: 0.6;
+  z-index: 10;
+}
+
+.christmas-corner-decoration::before {
+  content: '';
+  top: 8px;
+  left: 8px;
+}
+
+.christmas-corner-decoration::after {
+  content: '⭐';
+  bottom: 8px;
+  right: 8px;
+}
+
+/* Christmas Hover Glow */
+.christmas-hover-glow:hover {
+  box-shadow: 
+    0 0 20px rgba(196, 30, 58, 0.3),
+    0 0 40px rgba(22, 91, 51, 0.2),
+    0 0 60px rgba(255, 215, 0, 0.1);
+}
+
+/* Christmas Ribbon Effect */
+.christmas-ribbon {
+  position: relative;
+}
+
+.christmas-ribbon::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: -30px;
+  width: 100px;
+  height: 20px;
+  background: var(--christmas-red);
+  transform: rotate(45deg);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Christmas Gift Box Card */
+.christmas-gift-card {
+  background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+  border: 3px solid var(--christmas-red);
+  position: relative;
+}
+
+.christmas-gift-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--christmas-gold) 0%, var(--christmas-gold-warm) 100%);
+}
+
+.christmas-gift-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(90deg, var(--christmas-gold) 0%, var(--christmas-gold-warm) 100%);
+}
+
+/* Candy Cane Border */
+.candy-cane-border {
+  border-image: repeating-linear-gradient(
+    45deg,
+    var(--christmas-red) 0px,
+    var(--christmas-red) 10px,
+    white 10px,
+    white 20px
+  ) 10;
+}
+
+/* Christmas Sparkle Animation */
+@keyframes christmas-sparkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.christmas-sparkle {
+  animation: christmas-sparkle 2s ease-in-out infinite;
+}
+
+/* Christmas Star */
+.christmas-star {
+  color: var(--christmas-gold);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  animation: christmas-sparkle 1.5s ease-in-out infinite;
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .snowflake,
+  .santa-hat,
+  .christmas-ornament,
+  .christmas-light,
+  .christmas-sparkle,
+  .christmas-star {
+    animation: none;
+  }
+}
+

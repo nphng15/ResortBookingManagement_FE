@@ -7,6 +7,7 @@ import ResortDescription from '../../components/ResortSection/ResortDescription'
 import RoomList from '../../components/ResortSection/RoomList'
 import ResortReview from '../../components/ResortSection/ResortReview'
 import { getResortById, type ResortDetail as ResortDetailType } from '../../services/resortService'
+import { useChristmasTheme } from '../../components/ChristmasTheme'
 
 const DESCRIPTIONS = [
   'Khu nghỉ dưỡng sang trọng với view biển tuyệt đẹp, mang đến trải nghiệm nghỉ dưỡng đẳng cấp 5 sao. Các tiện nghi hiện đại kết hợp với kiến trúc truyền thống tạo nên không gian thư giãn hoàn hảo.',
@@ -19,6 +20,7 @@ function ResortDetail() {
   const [resort, setResort] = useState<ResortDetailType | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { isChristmasTheme } = useChristmasTheme()
 
   useEffect(() => {
     const fetchResort = async () => {
@@ -42,27 +44,27 @@ function ResortDetail() {
 
   if (loading) {
     return (
-      <>
+      <div className={`min-h-screen ${isChristmasTheme ? 'bg-gradient-to-b from-red-50 to-green-50/30' : ''}`}>
         <SearchBar />
         <Container maxWidth="lg">
           <div className="py-8 flex justify-center">
-            <CircularProgress />
+            <CircularProgress sx={{ color: isChristmasTheme ? '#C41E3A' : undefined }} />
           </div>
         </Container>
-      </>
+      </div>
     )
   }
 
   if (error || !resort) {
     return (
-      <>
+      <div className={`min-h-screen ${isChristmasTheme ? 'bg-gradient-to-b from-red-50 to-green-50/30' : ''}`}>
         <SearchBar />
         <Container maxWidth="lg">
-          <div className="py-8 text-center text-red-500">
-            {error || 'Resort không tồn tại'}
+          <div className={`py-8 text-center ${isChristmasTheme ? 'text-red-700' : 'text-red-500'}`}>
+            {isChristmasTheme && '🎅 '}{error || 'Resort không tồn tại'}
           </div>
         </Container>
-      </>
+      </div>
     )
   }
 
@@ -72,15 +74,28 @@ function ResortDetail() {
   const randomDescription = DESCRIPTIONS[resort.id % DESCRIPTIONS.length]
 
   return (
-    <>
+    <div className={`min-h-screen ${isChristmasTheme ? 'bg-gradient-to-b from-red-50 via-white to-green-50/30' : ''}`}>
       <SearchBar />
       <Container maxWidth="lg">
         <div className="py-8">
+          {/* Christmas Banner */}
+          {isChristmasTheme && (
+            <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-red-600 to-green-700 text-white text-center christmas-glow">
+              <p className="text-lg font-semibold">
+                 Ưu đãi Giáng sinh đặc biệt! Giảm đến 30% cho đặt phòng trong mùa lễ hội 
+              </p>
+            </div>
+          )}
+
           {/* Gallery */}
           <GalleryPreview images={resort.images} resortName={resort.name} />
 
           {/* Content Card */}
-          <div className="mt-6 border border-gray-200 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.1)] p-6 bg-white">
+          <div className={`mt-6 rounded-2xl p-6 ${
+            isChristmasTheme 
+              ? 'border-2 border-red-200 shadow-[0_0_20px_rgba(196,30,58,0.1)] bg-gradient-to-br from-white to-red-50/30'
+              : 'border border-gray-200 shadow-[0_0_15px_rgba(0,0,0,0.1)] bg-white'
+          }`}>
             {/* Resort Info & Description */}
             <ResortDescription
               name={resort.name}
@@ -92,16 +107,16 @@ function ResortDetail() {
             />
 
             {/* Room List */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Các phòng khả dụng
+            <div className={`mt-6 pt-6 border-t ${isChristmasTheme ? 'border-red-200' : 'border-gray-200'}`}>
+              <h2 className={`text-2xl font-bold mb-4 ${isChristmasTheme ? 'text-red-800' : 'text-gray-900'}`}>
+                {isChristmasTheme ? ' Các phòng khả dụng' : 'Các phòng khả dụng'}
               </h2>
               <RoomList rooms={resort.room_types} />
             </div>
 
             {/* Reviews */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <div className={`mt-6 pt-6 border-t ${isChristmasTheme ? 'border-red-200' : 'border-gray-200'}`}>
+              <h2 className={`text-2xl font-bold mb-4 ${isChristmasTheme ? 'text-red-800' : 'text-gray-900'}`}>
                 Trải nghiệm của các người dùng
               </h2>
               <ResortReview resortId={resort.id} />
@@ -109,8 +124,9 @@ function ResortDetail() {
           </div>
         </div>
       </Container>
-    </>
+    </div>
   )
 }
 
 export default ResortDetail
+

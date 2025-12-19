@@ -1,20 +1,32 @@
+import { useChristmasTheme } from '../../components/ChristmasTheme';
+
 interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
   gradient: string;
+  christmasGradient: string;
+  isChristmas: boolean;
 }
 
-function FeatureCard({ icon, title, description, gradient }: FeatureCardProps) {
+function FeatureCard({ icon, title, description, gradient, christmasGradient, isChristmas }: FeatureCardProps) {
   return (
     <div className="relative group cursor-pointer">
-      <div className={`absolute -inset-0.5 ${gradient} rounded-3xl blur opacity-0 group-hover:opacity-75 transition duration-500`} />
-      <div className="relative bg-white rounded-3xl p-8 h-full border border-slate-100 group-hover:border-transparent transition-all duration-300">
-        <div className={`w-16 h-16 ${gradient} rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+      <div className={`absolute -inset-0.5 ${isChristmas ? christmasGradient : gradient} rounded-3xl blur opacity-0 group-hover:opacity-75 transition duration-500`} />
+      <div className={`relative rounded-3xl p-8 h-full transition-all duration-300 ${
+        isChristmas 
+          ? 'christmas-feature-card christmas-hover-glow group-hover:border-yellow-400' 
+          : 'bg-white border border-slate-100 group-hover:border-transparent'
+      }`}>
+        <div className={`w-16 h-16 ${isChristmas ? christmasGradient : gradient} rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
           {icon}
         </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-3">{title}</h3>
-        <p className="text-slate-500 leading-relaxed">{description}</p>
+        <h3 className={`text-xl font-bold mb-3 ${isChristmas ? 'text-red-800' : 'text-slate-900'}`}>{title}</h3>
+        <p className={`leading-relaxed ${isChristmas ? 'text-green-800' : 'text-slate-500'}`}>{description}</p>
+        {/* Bottom Christmas decoration */}
+        {isChristmas && (
+          <div className="absolute bottom-4 right-4 opacity-30 text-xs"></div>
+        )}
       </div>
     </div>
   );
@@ -45,35 +57,43 @@ const ShieldIcon = () => (
 );
 
 const features = [
-  { icon: <SearchIcon />, title: 'Tìm kiếm thông minh', description: 'AI gợi ý resort phù hợp với sở thích và ngân sách của bạn.', gradient: 'bg-gradient-to-br from-violet-500 to-purple-600' },
-  { icon: <CurrencyIcon />, title: 'Đảm bảo giá tốt', description: 'Cam kết hoàn 200% chênh lệch nếu tìm thấy giá rẻ hơn.', gradient: 'bg-gradient-to-br from-emerald-500 to-teal-600' },
-  { icon: <StarIcon />, title: 'Đánh giá xác thực', description: 'Chỉ hiển thị đánh giá từ khách đã check-out thực tế.', gradient: 'bg-gradient-to-br from-amber-500 to-orange-600' },
-  { icon: <ShieldIcon />, title: 'Bảo vệ toàn diện', description: 'Hoàn tiền 100% nếu resort không đúng như cam kết.', gradient: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
+  { icon: <SearchIcon />, title: 'Tìm kiếm thông minh', description: 'AI gợi ý resort phù hợp với sở thích và ngân sách của bạn.', gradient: 'bg-gradient-to-br from-violet-500 to-purple-600', christmasGradient: 'bg-gradient-to-br from-red-600 to-red-800' },
+  { icon: <CurrencyIcon />, title: 'Đảm bảo giá tốt', description: 'Cam kết hoàn 200% chênh lệch nếu tìm thấy giá rẻ hơn.', gradient: 'bg-gradient-to-br from-emerald-500 to-teal-600', christmasGradient: 'bg-gradient-to-br from-green-700 to-green-900' },
+  { icon: <StarIcon />, title: 'Đánh giá xác thực', description: 'Chỉ hiển thị đánh giá từ khách đã check-out thực tế.', gradient: 'bg-gradient-to-br from-amber-500 to-orange-600', christmasGradient: 'bg-gradient-to-br from-yellow-500 to-yellow-700' },
+  { icon: <ShieldIcon />, title: 'Bảo vệ toàn diện', description: 'Hoàn tiền 100% nếu resort không đúng như cam kết.', gradient: 'bg-gradient-to-br from-blue-500 to-cyan-600', christmasGradient: 'bg-gradient-to-br from-red-700 to-green-800' },
 ];
 
 function FeaturesSection() {
+  const { isChristmasTheme } = useChristmasTheme();
+
   return (
-    <section className="py-24 px-4 bg-gradient-to-b from-white to-slate-50">
+    <section className={`py-24 px-4 ${isChristmasTheme ? 'christmas-section-light' : 'bg-gradient-to-b from-white to-slate-50'}`}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-100 text-violet-700 rounded-full text-sm font-medium mb-6">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-            Tại sao chọn chúng tôi
-          </div>
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
             Trải nghiệm đặt phòng
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-600">hoàn toàn khác biệt</span>
+            <span className={`block ${isChristmasTheme ? 'christmas-gradient-text' : 'text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-600'}`}>
+              {isChristmasTheme ? 'mùa Giáng sinh!' : 'hoàn toàn khác biệt'}
+            </span>
           </h2>
-          <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-            Công nghệ hiện đại kết hợp dịch vụ tận tâm, mang đến trải nghiệm đặt resort tốt nhất Việt Nam
+          <p className={`text-lg max-w-2xl mx-auto ${isChristmasTheme ? 'text-green-800' : 'text-slate-500'}`}>
+            {isChristmasTheme 
+              ? '️ Công nghệ hiện đại mang đến những trải nghiệm nghỉ dưỡng tuyệt vời mùa lễ hội!'
+              : 'Công nghệ hiện đại kết hợp dịch vụ tận tâm, mang đến trải nghiệm đặt resort tốt nhất Việt Nam'}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <FeatureCard key={index} icon={feature.icon} title={feature.title} description={feature.description} gradient={feature.gradient} />
+            <FeatureCard 
+              key={index} 
+              icon={feature.icon} 
+              title={feature.title} 
+              description={feature.description} 
+              gradient={feature.gradient}
+              christmasGradient={feature.christmasGradient}
+              isChristmas={isChristmasTheme}
+            />
           ))}
         </div>
       </div>
@@ -82,3 +102,4 @@ function FeaturesSection() {
 }
 
 export default FeaturesSection;
+

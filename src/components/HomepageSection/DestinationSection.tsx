@@ -1,23 +1,47 @@
 import { useNavigate } from 'react-router';
+import { useChristmasTheme } from '../../components/ChristmasTheme';
 
 interface DestinationCardProps {
   name: string;
   image: string;
   resortCount: number;
   onClick?: () => void;
+  isChristmas: boolean;
 }
 
-function DestinationCard({ name, image, resortCount, onClick }: DestinationCardProps) {
+function DestinationCard({ name, image, resortCount, onClick, isChristmas }: DestinationCardProps) {
   return (
     <div onClick={onClick} className="relative group cursor-pointer">
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-cyan-600 rounded-3xl blur opacity-0 group-hover:opacity-60 transition duration-500" />
+      <div className={`absolute -inset-0.5 rounded-3xl blur opacity-0 group-hover:opacity-60 transition duration-500 ${
+        isChristmas 
+          ? 'bg-gradient-to-r from-red-600 via-green-600 to-red-600'
+          : 'bg-gradient-to-r from-violet-600 to-cyan-600'
+      }`} />
       <div className="relative overflow-hidden rounded-3xl">
+        {/* Christmas ribbon decoration */}
+        {isChristmas && (
+          <div className="absolute top-0 left-0 z-20">
+            <div className="bg-red-600 text-white text-xs font-bold px-5 py-1 transform -rotate-45 -translate-x-4 translate-y-1 shadow-lg">
+               Noel
+            </div>
+          </div>
+        )}
         <div className="aspect-[4/3] overflow-hidden">
           <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
+        <div className={`absolute inset-0 ${
+          isChristmas 
+            ? 'christmas-destination-overlay'
+            : 'bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent'
+        }`} />
         <div className="absolute bottom-0 left-0 right-0 p-6">
-          <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-violet-300 transition-colors duration-300">{name}</h3>
+          <h3 className={`text-2xl font-bold text-white mb-1 transition-colors duration-300 ${
+            isChristmas 
+              ? 'group-hover:text-yellow-300'
+              : 'group-hover:text-violet-300'
+          }`}>
+            {name}
+          </h3>
           <div className="flex items-center gap-2 text-white/80">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -25,7 +49,9 @@ function DestinationCard({ name, image, resortCount, onClick }: DestinationCardP
             <span className="text-sm font-medium">{resortCount} resort</span>
           </div>
         </div>
-        <div className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 -translate-x-2">
+        <div className={`absolute top-4 right-4 w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0 -translate-x-2 ${
+          isChristmas ? 'bg-red-500/40' : 'bg-white/20'
+        }`}>
           <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
@@ -46,39 +72,51 @@ const destinations = [
 
 function DestinationSection() {
   const navigate = useNavigate();
+  const { isChristmasTheme } = useChristmasTheme();
 
   const handleDestinationClick = (name: string) => {
     navigate(`/search?name=${encodeURIComponent(name)}`);
   };
 
   return (
-    <section className="py-24 px-4 bg-white">
+    <section className={`py-24 px-4 ${isChristmasTheme ? 'bg-gradient-to-b from-white to-red-50' : 'bg-white'}`}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium mb-6">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Điểm đến nổi bật
-          </div>
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
             Khám phá những
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">thiên đường nghỉ dưỡng</span>
+            <span className={`block ${isChristmasTheme ? 'christmas-gradient-text' : 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600'}`}>
+              {isChristmasTheme ? 'kỳ nghỉ Giáng sinh!' : 'thiên đường nghỉ dưỡng'}
+            </span>
           </h2>
-          <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-            Những địa điểm được yêu thích nhất với hàng trăm resort cao cấp đang chờ đón bạn
+          <p className={`text-lg max-w-2xl mx-auto ${isChristmasTheme ? 'text-green-800' : 'text-slate-500'}`}>
+            {isChristmasTheme 
+              ? 'Tận hưởng mùa lễ hội tại những điểm đến tuyệt vời với ưu đãi đặc biệt!'
+              : 'Những địa điểm được yêu thích nhất với hàng trăm resort cao cấp đang chờ đón bạn'}
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {destinations.map((dest) => (
-            <DestinationCard key={dest.id} name={dest.name} image={dest.image} resortCount={dest.resortCount} onClick={() => handleDestinationClick(dest.name)} />
+            <DestinationCard 
+              key={dest.id} 
+              name={dest.name} 
+              image={dest.image} 
+              resortCount={dest.resortCount} 
+              onClick={() => handleDestinationClick(dest.name)}
+              isChristmas={isChristmasTheme}
+            />
           ))}
         </div>
 
         <div className="text-center mt-12">
-          <button onClick={() => navigate('/search')} className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-semibold hover:bg-slate-800 transition-all duration-300 cursor-pointer group">
+          <button 
+            onClick={() => navigate('/search')} 
+            className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 cursor-pointer group ${
+              isChristmasTheme 
+                ? 'bg-gradient-to-r from-red-600 to-green-700 text-white hover:shadow-lg christmas-glow'
+                : 'bg-slate-900 text-white hover:bg-slate-800'
+            }`}
+          >
             Xem tất cả điểm đến
             <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -91,3 +129,4 @@ function DestinationSection() {
 }
 
 export default DestinationSection;
+
