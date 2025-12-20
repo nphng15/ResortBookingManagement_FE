@@ -4,7 +4,7 @@ import DefaultLayout from "../layouts/DefaultLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import PartnerLayout from "../layouts/PartnerLayout";
 import { CustomerManagementPage, PartnerManagementPage, PartnerApprovalPage, WithdrawRequestsPage } from "../pages/Admin";
-import { BookingManagementPage, RevenueManagementPage } from "../pages/Partner";
+import { BookingManagementPage, RevenueManagementPage, RoomManagementPage } from "../pages/Partner";
 import ResortList from "../pages/ResortList";
 import ResortDetail from "../pages/ResortDetails";
 import AuthPage from "../pages/Auth";
@@ -47,6 +47,7 @@ function AppRoutes() {
           <Route index element={<Navigate to="/partner/bookings" replace />} />
           <Route path="bookings" element={<BookingManagementPage />} />
           <Route path="revenue" element={<RevenueManagementPage />} />
+          <Route path="rooms" element={<RoomManagementPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Routes>

@@ -6,12 +6,14 @@ import {
   ArrowRightOnRectangleIcon,
   HomeIcon,
   UserCircleIcon,
+  CubeIcon,
 } from '@heroicons/react/24/outline';
 import { getCurrentUser, logout, getToken } from '../../services/authService';
 import type { Account } from '../../services/authService';
 
 const navItems = [
   { path: '/partner/bookings', label: 'Quản lý đặt phòng', icon: CalendarDaysIcon },
+  { path: '/partner/rooms', label: 'Quản lý phòng', icon: CubeIcon },
   { path: '/partner/revenue', label: 'Quản lý doanh thu', icon: ChartBarIcon },
 ];
 
