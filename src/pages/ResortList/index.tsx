@@ -1,18 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 import { MapPin, SearchX } from 'lucide-react';
 import ResortCard from '../../components/ResortSection/ResortCard';
 import ResortCardSkeleton from '../../components/ResortSection/ResortCard/ResortCardSkeleton';
-import ResortFilter from '../../components/ResortSection/Filter';
+import ResortFilter, { type FilterValues } from '../../components/ResortSection/Filter';
 import SearchBar from '../../components/ResortSection/SearchBar';
 import { searchResorts, type Resort } from '../../services/resortService';
 import { useChristmasTheme } from '../../components/ChristmasTheme';
+
+const DEFAULT_FILTERS: FilterValues = {
+  minPrice: 0,
+  maxPrice: 24000000,
+  ratings: [],
+};
 
 function ResortList() {
   const [searchParams] = useSearchParams();
   const [resorts, setResorts] = useState<Resort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterValues>(DEFAULT_FILTERS);
   const { isChristmasTheme } = useChristmasTheme();
 
   useEffect(() => {
@@ -40,6 +47,23 @@ function ResortList() {
 
     fetchResorts();
   }, [searchParams]);
+
+  // Filter resorts based on price range and star ratings
+  const filteredResorts = useMemo(() => {
+    return resorts.filter((resort) => {
+      // Price filter
+      const priceInRange = resort.min_price >= filters.minPrice && resort.min_price <= filters.maxPrice;
+      
+      // Star rating filter (if no ratings selected, show all)
+      const ratingMatch = filters.ratings.length === 0 || filters.ratings.includes(Math.round(resort.rating));
+      
+      return priceInRange && ratingMatch;
+    });
+  }, [resorts, filters]);
+
+  const handleFilterChange = (newFilters: FilterValues) => {
+    setFilters(newFilters);
+  };
 
   const locationName = searchParams.get('name') || 'Tất cả địa điểm';
 
@@ -72,7 +96,7 @@ function ResortList() {
                 {isChristmasTheme && '️ '}{locationName}
               </h1>
               <p className={`text-sm ${isChristmasTheme ? 'text-green-700' : 'text-slate-500'}`}>
-                {loading ? 'Đang tìm kiếm...' : `${resorts.length} kết quả được tìm thấy`}
+                {loading ? 'Đang tìm kiếm...' : `${filteredResorts.length} kết quả được tìm thấy`}
                 {isChristmasTheme && !loading && ' '}
               </p>
             </div>
@@ -84,7 +108,10 @@ function ResortList() {
       <div className="max-w-[1400px] mx-auto px-6 py-8">
         <div className="flex gap-8">
           {/* Filter Section - Left */}
-          <ResortFilter />
+          <ResortFilter 
+            onFilterChange={handleFilterChange}
+            filters={filters}
+          />
 
           {/* Resort Cards - Right */}
           <div className="flex-1 flex flex-col gap-5">
@@ -113,7 +140,7 @@ function ResortList() {
             )}
             
             {/* Empty State */}
-            {!loading && !error && resorts.length === 0 && (
+            {!loading && !error && filteredResorts.length === 0 && (
               <div className={`rounded-2xl border p-12 text-center shadow-sm ${
                 isChristmasTheme 
                   ? 'bg-gradient-to-br from-white to-red-50 border-red-200'
@@ -134,15 +161,17 @@ function ResortList() {
                   {isChristmasTheme ? ' Không tìm thấy kết quả' : 'Không tìm thấy kết quả'}
                 </h3>
                 <p className={`max-w-md mx-auto ${isChristmasTheme ? 'text-green-700' : 'text-slate-500'}`}>
-                  {isChristmasTheme 
-                    ? 'Không có resort nào phù hợp. Hãy thử đổi địa điểm để tìm kỳ nghỉ Giáng sinh hoàn hảo! '
-                    : 'Không có resort nào phù hợp với tiêu chí tìm kiếm của bạn. Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm địa điểm khác.'}
+                  {resorts.length > 0 
+                    ? 'Không có resort nào phù hợp với bộ lọc. Hãy thử điều chỉnh khoảng giá hoặc hạng sao.'
+                    : isChristmasTheme 
+                      ? 'Không có resort nào phù hợp. Hãy thử đổi địa điểm để tìm kỳ nghỉ Giáng sinh hoàn hảo! '
+                      : 'Không có resort nào phù hợp với tiêu chí tìm kiếm của bạn. Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm địa điểm khác.'}
                 </p>
               </div>
             )}
             
             {/* Results */}
-            {!loading && !error && resorts.map((resort) => (
+            {!loading && !error && filteredResorts.map((resort) => (
               <ResortCard
                 key={resort.id}
                 id={resort.id}

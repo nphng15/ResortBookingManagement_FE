@@ -3,7 +3,34 @@ import PriceRangeFilter from './PriceRangeFilter';
 import StarRatingFilter from './StarRatingFilter';
 import NeighborhoodsFilter from './NeighborhoodsFilter';
 
-function ResortFilter() {
+export interface FilterValues {
+  minPrice: number;
+  maxPrice: number;
+  ratings: number[];
+}
+
+interface ResortFilterProps {
+  onFilterChange?: (filters: FilterValues) => void;
+  filters?: FilterValues;
+}
+
+function ResortFilter({ onFilterChange, filters }: ResortFilterProps) {
+  const handlePriceChange = (min: number, max: number) => {
+    onFilterChange?.({
+      minPrice: min,
+      maxPrice: max,
+      ratings: filters?.ratings || [],
+    });
+  };
+
+  const handleRatingChange = (ratings: number[]) => {
+    onFilterChange?.({
+      minPrice: filters?.minPrice || 0,
+      maxPrice: filters?.maxPrice || 24000000,
+      ratings,
+    });
+  };
+
   return (
     <div className="w-[320px] h-fit sticky top-[140px] flex flex-col gap-4">
       {/* Explore on Map */}
@@ -35,10 +62,17 @@ function ResortFilter() {
         </div>
         
         {/* Price Range Filter */}
-        <PriceRangeFilter />
+        <PriceRangeFilter 
+          onPriceChange={handlePriceChange}
+          minPrice={filters?.minPrice}
+          maxPrice={filters?.maxPrice}
+        />
 
         {/* Star Rating Filter */}
-        <StarRatingFilter />
+        <StarRatingFilter 
+          onRatingChange={handleRatingChange}
+          selectedRatings={filters?.ratings}
+        />
 
         {/* Neighborhoods Filter */}
         <NeighborhoodsFilter />

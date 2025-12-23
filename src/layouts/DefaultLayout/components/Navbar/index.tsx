@@ -5,8 +5,8 @@ import type { Account } from '../../../../services/authService';
 import { useChristmasTheme } from '../../../../components/ChristmasTheme';
 
 const pages = [
-  { name: 'Partnership', path: '/partnership' },
-  { name: 'Bookings', path: '/bookings' },
+//   { name: 'Partnership', path: '/partnership' },
+  { name: '', path: '/bookings' },
 ];
 
 function Navbar() {

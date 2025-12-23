@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star, ChevronDown } from 'lucide-react';
 
 interface StarRatingFilterProps {
   onRatingChange?: (ratings: number[]) => void;
+  selectedRatings?: number[];
 }
 
-function StarRatingFilter({ onRatingChange }: StarRatingFilterProps) {
+function StarRatingFilter({ onRatingChange, selectedRatings: propSelectedRatings }: StarRatingFilterProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const [selectedRatings, setSelectedRatings] = useState<number[]>(propSelectedRatings || []);
+
+  useEffect(() => {
+    if (propSelectedRatings) {
+      setSelectedRatings(propSelectedRatings);
+    }
+  }, [propSelectedRatings]);
 
   const ratings = [5, 4, 3, 2, 1];
 
