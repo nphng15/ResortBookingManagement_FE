@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import CardImagePreview from './CardImagePreview';
 import { Star, MapPin, Sparkles, BadgeCheck, Heart } from 'lucide-react'; 
 import { useChristmasTheme } from '../../../components/ChristmasTheme';
@@ -16,10 +16,25 @@ interface ResortCardProps {
 
 function ResortCard({id, name, address, images, rating, reviews: _reviews, priceOriginal, priceDiscounted}: ResortCardProps) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isChristmasTheme } = useChristmasTheme();
 
+  const getResortUrl = () => {
+    const params = new URLSearchParams();
+    const checkin = searchParams.get('checkin');
+    const checkout = searchParams.get('checkout');
+    const number = searchParams.get('number');
+    
+    if (checkin) params.set('checkin', checkin);
+    if (checkout) params.set('checkout', checkout);
+    if (number) params.set('number', number);
+    
+    const queryString = params.toString();
+    return `/resort/${id}${queryString ? `?${queryString}` : ''}`;
+  };
+
   const handleCardClick = () => {
-    navigate(`/resort/${id}`);
+    navigate(getResortUrl());
   };
 
   const getRatingLabel = (rating: number) => {
@@ -151,7 +166,7 @@ function ResortCard({id, name, address, images, rating, reviews: _reviews, price
         </div>
 
         <button 
-          onClick={(e) => { e.stopPropagation(); navigate(`/resort/${id}`); }}
+          onClick={(e) => { e.stopPropagation(); navigate(getResortUrl()); }}
           className={`mt-4 w-full py-2.5 px-4 rounded-xl text-white text-sm font-semibold shadow-lg transition-all duration-200 ${
             isChristmasTheme 
               ? 'bg-gradient-to-r from-red-600 to-green-700 hover:from-red-700 hover:to-green-800 shadow-red-500/25 hover:shadow-red-500/40'
