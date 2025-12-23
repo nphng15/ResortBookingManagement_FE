@@ -8,15 +8,8 @@ interface SignupFormProps {
 }
 
 function SignupForm({ isActive, onSuccess }: SignupFormProps) {
-  const {
-    accountType,
-    setAccountType,
-    form,
-    loading,
-    error,
-    updateField,
-    handleSubmit,
-  } = useSignupForm(onSuccess);
+  const { accountType, setAccountType, form, loading, error, fieldErrors, updateField, handleSubmit } =
+    useSignupForm(onSuccess);
 
   return (
     <div
@@ -26,7 +19,7 @@ function SignupForm({ isActive, onSuccess }: SignupFormProps) {
     >
       <div className="w-full px-10">
         <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Tạo tài khoản</h2>
-        
+
         {/* Account Type Toggle */}
         <div className="flex justify-center mb-4">
           <div className="bg-gray-100 rounded-full p-1 flex">
@@ -56,53 +49,90 @@ function SignupForm({ isActive, onSuccess }: SignupFormProps) {
         </div>
 
         {accountType === 'customer' && <SocialButtons />}
-        
+
         <p className="text-gray-400 text-xs text-center mb-3">
-          {accountType === 'customer' 
-            ? 'hoặc sử dụng email để đăng ký' 
+          {accountType === 'customer'
+            ? 'hoặc sử dụng email để đăng ký'
             : 'Đăng ký tài khoản đối tác resort'}
         </p>
 
         {error && (
-          <div className="bg-red-100 text-red-600 text-xs p-2 rounded-lg mb-3 text-center">
-            {error}
-          </div>
+          <div className="bg-red-100 text-red-600 text-xs p-2 rounded-lg mb-3 text-center">{error}</div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <FormInput
             type="text"
-            placeholder="Tên đăng nhập"
+            placeholder="Tên đăng nhập *"
             value={form.username}
             onChange={(v) => updateField('username', v)}
+            error={fieldErrors.username}
           />
           <FormInput
             type="password"
-            placeholder="Mật khẩu"
+            placeholder="Mật khẩu *"
             value={form.password}
             onChange={(v) => updateField('password', v)}
+            error={fieldErrors.password}
           />
           <FormInput
             type="password"
-            placeholder="Xác nhận mật khẩu"
+            placeholder="Xác nhận mật khẩu *"
             value={form.confirmPassword}
             onChange={(v) => updateField('confirmPassword', v)}
+            error={fieldErrors.confirmPassword}
           />
 
-          {/* Partner fields */}
-          {accountType === 'partner' && (
+          {/* Customer fields */}
+          {accountType === 'customer' && (
             <>
               <FormInput
                 type="text"
-                placeholder="Tên doanh nghiệp"
-                value={form.name}
-                onChange={(v) => updateField('name', v)}
+                placeholder="Họ và tên"
+                value={form.fullname}
+                onChange={(v) => updateField('fullname', v)}
+                error={fieldErrors.fullname}
+              />
+              <FormInput
+                type="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={(v) => updateField('email', v)}
+                error={fieldErrors.email}
               />
               <FormInput
                 type="tel"
                 placeholder="Số điện thoại"
                 value={form.phone_number}
                 onChange={(v) => updateField('phone_number', v)}
+                error={fieldErrors.phone_number}
+              />
+              <FormInput
+                type="text"
+                placeholder="Số CCCD (12 số)"
+                value={form.id_number}
+                onChange={(v) => updateField('id_number', v.replace(/\D/g, '').slice(0, 12))}
+                error={fieldErrors.id_number}
+              />
+            </>
+          )}
+
+          {/* Partner fields */}
+          {accountType === 'partner' && (
+            <>
+              <FormInput
+                type="text"
+                placeholder="Tên doanh nghiệp *"
+                value={form.name}
+                onChange={(v) => updateField('name', v)}
+                error={fieldErrors.name}
+              />
+              <FormInput
+                type="tel"
+                placeholder="Số điện thoại"
+                value={form.phone_number}
+                onChange={(v) => updateField('phone_number', v)}
+                error={fieldErrors.phone_number}
               />
               <FormInput
                 type="text"
@@ -114,7 +144,8 @@ function SignupForm({ isActive, onSuccess }: SignupFormProps) {
                 type="text"
                 placeholder="Số tài khoản ngân hàng"
                 value={form.banking_number}
-                onChange={(v) => updateField('banking_number', v)}
+                onChange={(v) => updateField('banking_number', v.replace(/\D/g, ''))}
+                error={fieldErrors.banking_number}
               />
               <FormInput
                 type="text"
@@ -124,7 +155,7 @@ function SignupForm({ isActive, onSuccess }: SignupFormProps) {
               />
             </>
           )}
-          
+
           <button
             type="submit"
             disabled={loading}

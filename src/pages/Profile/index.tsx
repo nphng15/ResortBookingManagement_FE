@@ -1,10 +1,63 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { UserCircleIcon, BuildingOffice2Icon, PencilIcon, CheckIcon, XMarkIcon, KeyIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import {
+  UserCircleIcon,
+  BuildingOffice2Icon,
+  PencilIcon,
+  CheckIcon,
+  XMarkIcon,
+  KeyIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from '@heroicons/react/24/outline';
 import { getCurrentUser, getToken } from '../../services/authService';
 import { updateCustomerProfile, changePassword } from '../../services/customerService';
 import { updatePartnerProfile } from '../../services/partnerProfileService';
 import type { Account, CustomerInfo, PartnerInfo } from '../../services/authService';
+
+// Validation helpers
+const validateEmail = (email: string): string | null => {
+  if (!email) return null; // Optional field
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) return 'Email không hợp lệ';
+  return null;
+};
+
+const validatePhone = (phone: string): string | null => {
+  if (!phone) return null; // Optional field
+  const phoneRegex = /^(0|\+84)[0-9]{9,10}$/;
+  if (!phoneRegex.test(phone.replace(/\s/g, ''))) return 'Số điện thoại không hợp lệ (VD: 0901234567)';
+  return null;
+};
+
+const validateIdNumber = (idNumber: string): string | null => {
+  if (!idNumber) return null; // Optional field
+  // CCCD: 12 số, CMND: 9 hoặc 12 số
+  const idRegex = /^[0-9]{9}$|^[0-9]{12}$/;
+  if (!idRegex.test(idNumber)) return 'CCCD/CMND phải có 9 hoặc 12 số';
+  return null;
+};
+
+const validateFullname = (name: string): string | null => {
+  if (!name) return null; // Optional field
+  if (name.length < 2) return 'Họ tên phải có ít nhất 2 ký tự';
+  if (name.length > 100) return 'Họ tên không được quá 100 ký tự';
+  // Check for special characters (allow Vietnamese characters)
+  const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
+  if (!nameRegex.test(name)) return 'Họ tên không được chứa số hoặc ký tự đặc biệt';
+  return null;
+};
+
+interface FormErrors {
+  fullname?: string;
+  email?: string;
+  phone_number?: string;
+  id_number?: string;
+  name?: string;
+  address?: string;
+  banking_number?: string;
+  bank?: string;
+}
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -14,15 +67,31 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Customer form
-  const [customerForm, setCustomerForm] = useState({ fullname: '', email: '', phone_number: '', id_number: '' });
+  const [customerForm, setCustomerForm] = useState({
+    fullname: '',
+    email: '',
+    phone_number: '',
+    id_number: '',
+  });
   // Partner form
-  const [partnerForm, setPartnerForm] = useState({ name: '', phone_number: '', address: '', banking_number: '', bank: '' });
+  const [partnerForm, setPartnerForm] = useState({
+    name: '',
+    phone_number: '',
+    address: '',
+    banking_number: '',
+    bank: '',
+  });
 
   // Password change state
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ old_password: '', new_password: '', confirm_password: '' });
+  const [passwordForm, setPasswordForm] = useState({
+    old_password: '',
+    new_password: '',
+    confirm_password: '',
+  });
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
@@ -64,19 +133,68 @@ export default function ProfilePage() {
     loadProfile();
   }, [navigate]);
 
+  const validateCustomerForm = (): boolean => {
+    const errors: FormErrors = {};
+
+    const fullnameError = validateFullname(customerForm.fullname);
+    if (fullnameError) errors.fullname = fullnameError;
+
+    const emailError = validateEmail(customerForm.email);
+    if (emailError) errors.email = emailError;
+
+    const phoneError = validatePhone(customerForm.phone_number);
+    if (phoneError) errors.phone_number = phoneError;
+
+    const idError = validateIdNumber(customerForm.id_number);
+    if (idError) errors.id_number = idError;
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validatePartnerForm = (): boolean => {
+    const errors: FormErrors = {};
+
+    if (partnerForm.name && partnerForm.name.length < 2) {
+      errors.name = 'Tên doanh nghiệp phải có ít nhất 2 ký tự';
+    }
+
+    const phoneError = validatePhone(partnerForm.phone_number);
+    if (phoneError) errors.phone_number = phoneError;
+
+    if (partnerForm.banking_number && !/^[0-9]{6,20}$/.test(partnerForm.banking_number)) {
+      errors.banking_number = 'Số tài khoản không hợp lệ';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSave = async () => {
-    setSaving(true);
     setError('');
     setSuccess('');
+
+    // Validate before saving
+    if (isCustomer && !validateCustomerForm()) {
+      return;
+    }
+    if (isPartner && !validatePartnerForm()) {
+      return;
+    }
+
+    setSaving(true);
     try {
       if (isPartner) {
         const result = await updatePartnerProfile(partnerForm);
-        setUser(prev => prev ? { ...prev, partner: { ...prev.partner, ...result.partner } as PartnerInfo } : null);
+        setUser((prev) =>
+          prev ? { ...prev, partner: { ...prev.partner, ...result.partner } as PartnerInfo } : null
+        );
       } else if (isCustomer) {
         const result = await updateCustomerProfile(customerForm);
-        setUser(prev => prev ? { ...prev, customer: result.customer as CustomerInfo } : null);
+        setUser((prev) => (prev ? { ...prev, customer: result.customer as CustomerInfo } : null));
       }
       setIsEditing(false);
+      setFormErrors({});
       setSuccess('Cập nhật thông tin thành công');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Cập nhật thất bại');
@@ -104,6 +222,7 @@ export default function ProfilePage() {
       });
     }
     setIsEditing(false);
+    setFormErrors({});
   };
 
   const handleChangePassword = async () => {
@@ -189,30 +308,99 @@ export default function ProfilePage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Họ và tên</label>
                   {isEditing ? (
-                    <input type="text" value={customerForm.fullname} onChange={(e) => setCustomerForm({ ...customerForm, fullname: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500" />
-                  ) : <p className="text-gray-900">{user?.customer?.fullname || '-'}</p>}
+                    <>
+                      <input
+                        type="text"
+                        value={customerForm.fullname}
+                        onChange={(e) => {
+                          setCustomerForm({ ...customerForm, fullname: e.target.value });
+                          if (formErrors.fullname) setFormErrors({ ...formErrors, fullname: undefined });
+                        }}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                          formErrors.fullname ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                        }`}
+                      />
+                      {formErrors.fullname && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.fullname}</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-gray-900">{user?.customer?.fullname || '-'}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
                   {isEditing ? (
-                    <input type="email" value={customerForm.email} onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500" />
-                  ) : <p className="text-gray-900">{user?.customer?.email || '-'}</p>}
+                    <>
+                      <input
+                        type="email"
+                        value={customerForm.email}
+                        onChange={(e) => {
+                          setCustomerForm({ ...customerForm, email: e.target.value });
+                          if (formErrors.email) setFormErrors({ ...formErrors, email: undefined });
+                        }}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                          formErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                        }`}
+                        placeholder="example@email.com"
+                      />
+                      {formErrors.email && <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>}
+                    </>
+                  ) : (
+                    <p className="text-gray-900">{user?.customer?.email || '-'}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">Số điện thoại</label>
                   {isEditing ? (
-                    <input type="tel" value={customerForm.phone_number} onChange={(e) => setCustomerForm({ ...customerForm, phone_number: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500" />
-                  ) : <p className="text-gray-900">{user?.customer?.phone_number || '-'}</p>}
+                    <>
+                      <input
+                        type="tel"
+                        value={customerForm.phone_number}
+                        onChange={(e) => {
+                          setCustomerForm({ ...customerForm, phone_number: e.target.value });
+                          if (formErrors.phone_number)
+                            setFormErrors({ ...formErrors, phone_number: undefined });
+                        }}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                          formErrors.phone_number ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                        }`}
+                        placeholder="0901234567"
+                      />
+                      {formErrors.phone_number && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.phone_number}</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-gray-900">{user?.customer?.phone_number || '-'}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500 mb-1">CCCD/CMND</label>
                   {isEditing ? (
-                    <input type="text" value={customerForm.id_number} onChange={(e) => setCustomerForm({ ...customerForm, id_number: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500" />
-                  ) : <p className="text-gray-900">{user?.customer?.id_number || '-'}</p>}
+                    <>
+                      <input
+                        type="text"
+                        value={customerForm.id_number}
+                        onChange={(e) => {
+                          // Only allow numbers
+                          const value = e.target.value.replace(/\D/g, '');
+                          setCustomerForm({ ...customerForm, id_number: value });
+                          if (formErrors.id_number) setFormErrors({ ...formErrors, id_number: undefined });
+                        }}
+                        maxLength={12}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                          formErrors.id_number ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                        }`}
+                        placeholder="012345678901"
+                      />
+                      {formErrors.id_number && (
+                        <p className="mt-1 text-sm text-red-600">{formErrors.id_number}</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-gray-900">{user?.customer?.id_number || '-'}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -224,23 +412,61 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">Tên doanh nghiệp</label>
                     {isEditing ? (
-                      <input type="text" value={partnerForm.name} onChange={(e) => setPartnerForm({ ...partnerForm, name: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                    ) : <p className="text-gray-900">{user?.partner?.name || '-'}</p>}
+                      <>
+                        <input
+                          type="text"
+                          value={partnerForm.name}
+                          onChange={(e) => {
+                            setPartnerForm({ ...partnerForm, name: e.target.value });
+                            if (formErrors.name) setFormErrors({ ...formErrors, name: undefined });
+                          }}
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                            formErrors.name ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                          }`}
+                        />
+                        {formErrors.name && <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>}
+                      </>
+                    ) : (
+                      <p className="text-gray-900">{user?.partner?.name || '-'}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">Số điện thoại</label>
                     {isEditing ? (
-                      <input type="tel" value={partnerForm.phone_number} onChange={(e) => setPartnerForm({ ...partnerForm, phone_number: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                    ) : <p className="text-gray-900">{user?.partner?.phone_number || '-'}</p>}
+                      <>
+                        <input
+                          type="tel"
+                          value={partnerForm.phone_number}
+                          onChange={(e) => {
+                            setPartnerForm({ ...partnerForm, phone_number: e.target.value });
+                            if (formErrors.phone_number)
+                              setFormErrors({ ...formErrors, phone_number: undefined });
+                          }}
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                            formErrors.phone_number ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                          }`}
+                          placeholder="0901234567"
+                        />
+                        {formErrors.phone_number && (
+                          <p className="mt-1 text-sm text-red-600">{formErrors.phone_number}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-gray-900">{user?.partner?.phone_number || '-'}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">Địa chỉ</label>
                     {isEditing ? (
-                      <textarea value={partnerForm.address} onChange={(e) => setPartnerForm({ ...partnerForm, address: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" rows={2} />
-                    ) : <p className="text-gray-900">{user?.partner?.address || '-'}</p>}
+                      <textarea
+                        value={partnerForm.address}
+                        onChange={(e) => setPartnerForm({ ...partnerForm, address: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        rows={2}
+                      />
+                    ) : (
+                      <p className="text-gray-900">{user?.partner?.address || '-'}</p>
+                    )}
                   </div>
                 </div>
 
@@ -251,20 +477,46 @@ export default function ProfilePage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-500 mb-1">Ngân hàng</label>
                       {isEditing ? (
-                        <input type="text" value={partnerForm.bank} onChange={(e) => setPartnerForm({ ...partnerForm, bank: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                      ) : <p className="text-gray-900">{user?.partner?.bank || '-'}</p>}
+                        <input
+                          type="text"
+                          value={partnerForm.bank}
+                          onChange={(e) => setPartnerForm({ ...partnerForm, bank: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      ) : (
+                        <p className="text-gray-900">{user?.partner?.bank || '-'}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-500 mb-1">Số tài khoản</label>
                       {isEditing ? (
-                        <input type="text" value={partnerForm.banking_number} onChange={(e) => setPartnerForm({ ...partnerForm, banking_number: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                      ) : <p className="text-gray-900">{user?.partner?.banking_number || '-'}</p>}
+                        <>
+                          <input
+                            type="text"
+                            value={partnerForm.banking_number}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              setPartnerForm({ ...partnerForm, banking_number: value });
+                              if (formErrors.banking_number)
+                                setFormErrors({ ...formErrors, banking_number: undefined });
+                            }}
+                            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                              formErrors.banking_number ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                            }`}
+                          />
+                          {formErrors.banking_number && (
+                            <p className="mt-1 text-sm text-red-600">{formErrors.banking_number}</p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-gray-900">{user?.partner?.banking_number || '-'}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-500 mb-1">Số dư hiện tại</label>
-                      <p className="text-emerald-600 font-semibold">{formatCurrency(user?.partner?.balance || 0)}</p>
+                      <p className="text-emerald-600 font-semibold">
+                        {formatCurrency(user?.partner?.balance || 0)}
+                      </p>
                     </div>
                   </div>
                 </div>

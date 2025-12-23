@@ -15,6 +15,10 @@ export interface LoginResponse {
 export interface RegisterRequest {
   username: string;
   password: string;
+  fullname?: string;
+  email?: string;
+  phone_number?: string;
+  id_number?: string;
 }
 
 export interface CustomerInfo {
