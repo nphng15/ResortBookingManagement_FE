@@ -9,6 +9,7 @@ export interface CartItemResponse {
   resort_name: string;
   number_of_rooms: number;
   price_per_room: number;
+  num_nights: number;
   cost: number;
   started_at: string;
   finished_at: string;

@@ -108,7 +108,7 @@ function CartItem({ item, isUpdating, onIncrease, onDecrease, onRemove }: CartIt
 
         <div className="text-right">
           <p className="text-sm text-slate-500 mb-0.5">
-            {item.price.toLocaleString('vi-VN')}đ × {item.quantity} phòng
+            {item.price.toLocaleString('vi-VN')}đ × {item.numNights} đêm × {item.quantity} phòng
           </p>
           <p className="font-bold text-xl text-slate-800">
             {item.cost.toLocaleString('vi-VN')}đ

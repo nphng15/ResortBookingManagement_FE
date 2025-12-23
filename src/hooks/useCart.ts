@@ -12,6 +12,7 @@ export interface CartItem {
   roomName: string;
   resortName: string;
   price: number;
+  numNights: number;
   quantity: number;
   cost: number;
   startedAt: string;
@@ -33,6 +34,7 @@ const mapCartItem = (item: CartItemResponse): CartItem => ({
   roomName: item.room_type_name,
   resortName: item.resort_name,
   price: item.price_per_room,
+  numNights: item.num_nights,
   quantity: item.number_of_rooms,
   cost: item.cost,
   startedAt: item.started_at,
