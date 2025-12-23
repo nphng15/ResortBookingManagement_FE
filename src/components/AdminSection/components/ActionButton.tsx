@@ -4,9 +4,10 @@ interface ActionButtonProps {
   children: React.ReactNode;
   disabled?: boolean;
   size?: 'sm' | 'md';
+  loading?: boolean;
 }
 
-export default function ActionButton({ onClick, variant = 'ghost', children, disabled = false, size = 'sm' }: ActionButtonProps) {
+export default function ActionButton({ onClick, variant = 'ghost', children, disabled = false, size = 'sm', loading = false }: ActionButtonProps) {
   const baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed';
   
   const sizeClasses = {
@@ -22,8 +23,15 @@ export default function ActionButton({ onClick, variant = 'ghost', children, dis
   };
 
   return (
-    <button onClick={onClick} disabled={disabled} className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`}>
-      {children}
+    <button onClick={onClick} disabled={disabled || loading} className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`}>
+      {loading ? (
+        <>
+          <span className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+          Đang xử lý...
+        </>
+      ) : (
+        children
+      )}
     </button>
   );
 }
