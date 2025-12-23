@@ -1,5 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
-import { deleteBookingDetail, getCart, type CartItemResponse } from '../services/cartService';
+import {
+  deleteBookingDetail,
+  getCart,
+  updateBookingDetail,
+  type CartItemResponse,
+} from '../services/cartService';
 
 export interface CartItem {
   id: number; // booking_detail_id
@@ -40,6 +45,7 @@ export function useCart() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [cartId, setCartId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<number | null>(null); // Track which item is updating
   const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'error' });
 
   // Fetch cart on mount
@@ -79,32 +85,77 @@ export function useCart() {
     setToast({ show: false, message: '', type: 'error' });
   }, []);
 
-  // TODO: Implement với API PUT /booking-detail/{id}
-  const increaseQuantity = useCallback((itemId: number) => {
-    console.log('Increase quantity for item:', itemId);
-    showToast('Chức năng đang phát triển', 'error');
-  }, [showToast]);
+  const increaseQuantity = useCallback(
+    async (itemId: number) => {
+      const item = items.find((i) => i.id === itemId);
+      if (!item) return;
 
-  const decreaseQuantity = useCallback((itemId: number) => {
-    console.log('Decrease quantity for item:', itemId);
-    showToast('Chức năng đang phát triển', 'error');
-  }, [showToast]);
+      // Check available rooms
+      if (item.availableRooms !== undefined && item.quantity >= item.availableRooms) {
+        showToast(`Chỉ còn ${item.availableRooms} phòng khả dụng`, 'error');
+        return;
+      }
 
-  const removeItem = useCallback(async (bookingDetailId: number) => {
-    try {
-      await deleteBookingDetail(bookingDetailId);
-      setItems(prev => prev.filter(item => item.id !== bookingDetailId));
-      showToast('Đã xóa phòng khỏi giỏ hàng', 'success');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Không thể xóa item';
-      showToast(message, 'error');
-    }
-  }, [showToast]);
+      const newQuantity = item.quantity + 1;
+
+      try {
+        setUpdating(itemId);
+        await updateBookingDetail(itemId, { number_of_rooms: newQuantity });
+        // Refetch to get updated cost
+        await fetchCart();
+        showToast('Đã cập nhật số lượng', 'success');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Không thể cập nhật';
+        showToast(message, 'error');
+      } finally {
+        setUpdating(null);
+      }
+    },
+    [items, showToast, fetchCart]
+  );
+
+  const decreaseQuantity = useCallback(
+    async (itemId: number) => {
+      const item = items.find((i) => i.id === itemId);
+      if (!item || item.quantity <= 1) return;
+
+      const newQuantity = item.quantity - 1;
+
+      try {
+        setUpdating(itemId);
+        await updateBookingDetail(itemId, { number_of_rooms: newQuantity });
+        // Refetch to get updated cost
+        await fetchCart();
+        showToast('Đã cập nhật số lượng', 'success');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Không thể cập nhật';
+        showToast(message, 'error');
+      } finally {
+        setUpdating(null);
+      }
+    },
+    [items, showToast, fetchCart]
+  );
+
+  const removeItem = useCallback(
+    async (bookingDetailId: number) => {
+      try {
+        await deleteBookingDetail(bookingDetailId);
+        setItems((prev) => prev.filter((item) => item.id !== bookingDetailId));
+        showToast('Đã xóa phòng khỏi giỏ hàng', 'success');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Không thể xóa item';
+        showToast(message, 'error');
+      }
+    },
+    [showToast]
+  );
 
   return {
     items,
     cartId,
     loading,
+    updating,
     totalPrice,
     totalItems,
     toast,

@@ -1,8 +1,9 @@
-import { Minus, Plus, Trash2, Calendar, Maximize2, Home } from 'lucide-react';
+import { Minus, Plus, Trash2, Calendar, Maximize2, Home, Loader2 } from 'lucide-react';
 import type { CartItem as CartItemType } from '../../hooks/useCart';
 
 interface CartItemProps {
   item: CartItemType;
+  isUpdating?: boolean;
   onIncrease: (itemId: number) => void;
   onDecrease: (itemId: number) => void;
   onRemove: (bookingDetailId: number) => void;
@@ -14,13 +15,14 @@ const formatDate = (dateStr: string) => {
   return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-function CartItem({ item, onIncrease, onDecrease, onRemove }: CartItemProps) {
+function CartItem({ item, isUpdating, onIncrease, onDecrease, onRemove }: CartItemProps) {
   const isOverBooked = item.availableRooms !== undefined && item.quantity > item.availableRooms;
+  const canIncrease = item.availableRooms === undefined || item.quantity < item.availableRooms;
   
   return (
     <div className={`group bg-white rounded-2xl border p-5 hover:shadow-lg transition-all duration-300 ${
       isOverBooked ? 'border-red-300 bg-red-50/30' : 'border-slate-200 hover:border-slate-300'
-    }`}>
+    } ${isUpdating ? 'opacity-70 pointer-events-none' : ''}`}>
       <div className="flex gap-5">
         {/* Room Image */}
         <div className="w-36 h-28 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden flex-shrink-0 relative">
@@ -78,15 +80,22 @@ function CartItem({ item, onIncrease, onDecrease, onRemove }: CartItemProps) {
           <div className="flex items-center bg-slate-50 rounded-xl p-1">
             <button
               onClick={() => onDecrease(item.id)}
-              disabled={item.quantity <= 1}
+              disabled={item.quantity <= 1 || isUpdating}
               className="w-10 h-10 rounded-lg hover:bg-white hover:shadow-sm flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none cursor-pointer"
             >
               <Minus size={18} className="text-slate-600" />
             </button>
-            <span className="w-12 text-center font-bold text-lg text-slate-800">{item.quantity}</span>
+            <span className="w-12 text-center font-bold text-lg text-slate-800">
+              {isUpdating ? (
+                <Loader2 size={18} className="animate-spin mx-auto text-blue-500" />
+              ) : (
+                item.quantity
+              )}
+            </span>
             <button
               onClick={() => onIncrease(item.id)}
-              className="w-10 h-10 rounded-lg hover:bg-white hover:shadow-sm flex items-center justify-center transition-all cursor-pointer"
+              disabled={!canIncrease || isUpdating}
+              className="w-10 h-10 rounded-lg hover:bg-white hover:shadow-sm flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none cursor-pointer"
             >
               <Plus size={18} className="text-slate-600" />
             </button>

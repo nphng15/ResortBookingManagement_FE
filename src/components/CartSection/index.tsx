@@ -13,6 +13,7 @@ function CartSection() {
     items,
     cartId,
     loading,
+    updating,
     totalPrice,
     totalItems,
     toast,
@@ -64,6 +65,7 @@ function CartSection() {
           <div className="lg:col-span-2">
             <CartList
               items={items}
+              updatingItemId={updating}
               onIncrease={increaseQuantity}
               onDecrease={decreaseQuantity}
               onRemove={removeItem}

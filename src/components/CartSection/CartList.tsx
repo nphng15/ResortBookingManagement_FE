@@ -3,12 +3,13 @@ import type { CartItem as CartItemType } from '../../hooks/useCart';
 
 interface CartListProps {
   items: CartItemType[];
+  updatingItemId?: number | null;
   onIncrease: (itemId: number) => void;
   onDecrease: (itemId: number) => void;
   onRemove: (bookingDetailId: number) => void;
 }
 
-function CartList({ items, onIncrease, onDecrease, onRemove }: CartListProps) {
+function CartList({ items, updatingItemId, onIncrease, onDecrease, onRemove }: CartListProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -25,6 +26,7 @@ function CartList({ items, onIncrease, onDecrease, onRemove }: CartListProps) {
           <CartItem
             key={item.id}
             item={item}
+            isUpdating={updatingItemId === item.id}
             onIncrease={onIncrease}
             onDecrease={onDecrease}
             onRemove={onRemove}

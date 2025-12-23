@@ -78,6 +78,35 @@ export const addToCart = async (data: AddToCartRequest): Promise<{ message: stri
   return response.json();
 };
 
+// Cập nhật số lượng phòng
+export interface UpdateBookingDetailRequest {
+  number_of_rooms: number;
+}
+
+export const updateBookingDetail = async (
+  bookingDetailId: number,
+  data: UpdateBookingDetailRequest
+): Promise<{ message: string }> => {
+  const token = getToken();
+  if (!token) throw new Error('Chưa đăng nhập');
+
+  const response = await fetch(`${API_BASE_URL}/booking-detail/${bookingDetailId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Không thể cập nhật số lượng phòng');
+  }
+
+  return response.json();
+};
+
 // Xóa item khỏi giỏ hàng
 export const deleteBookingDetail = async (bookingDetailId: number): Promise<{ message: string }> => {
   const token = getToken();
