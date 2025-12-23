@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2, Calendar, Maximize2 } from 'lucide-react';
+import { Minus, Plus, Trash2, Calendar, Maximize2, Home } from 'lucide-react';
 import type { CartItem as CartItemType } from '../../hooks/useCart';
 
 interface CartItemProps {
@@ -15,8 +15,12 @@ const formatDate = (dateStr: string) => {
 };
 
 function CartItem({ item, onIncrease, onDecrease, onRemove }: CartItemProps) {
+  const isOverBooked = item.availableRooms !== undefined && item.quantity > item.availableRooms;
+  
   return (
-    <div className="group bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-lg hover:border-slate-300 transition-all duration-300">
+    <div className={`group bg-white rounded-2xl border p-5 hover:shadow-lg transition-all duration-300 ${
+      isOverBooked ? 'border-red-300 bg-red-50/30' : 'border-slate-200 hover:border-slate-300'
+    }`}>
       <div className="flex gap-5">
         {/* Room Image */}
         <div className="w-36 h-28 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden flex-shrink-0 relative">
@@ -43,12 +47,28 @@ function CartItem({ item, onIncrease, onDecrease, onRemove }: CartItemProps) {
             </button>
           </div>
           
-          <div className="flex items-center gap-4 mt-3 text-sm text-slate-600">
+          <div className="flex items-center gap-3 mt-3 text-sm text-slate-600 flex-wrap">
             <span className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg">
               <Calendar size={14} className="text-slate-400" />
               {formatDate(item.startedAt)} - {formatDate(item.finishedAt)}
             </span>
+            {item.availableRooms !== undefined && (
+              <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-medium ${
+                item.availableRooms > 0
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'
+              }`}>
+                <Home size={14} />
+                {item.availableRooms > 0 ? `Còn ${item.availableRooms} phòng` : 'Hết phòng'}
+              </span>
+            )}
           </div>
+          
+          {isOverBooked && (
+            <p className="mt-2 text-sm text-red-600 font-medium">
+              ⚠️ Số phòng đặt vượt quá số phòng khả dụng
+            </p>
+          )}
         </div>
       </div>
 

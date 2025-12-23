@@ -14,6 +14,7 @@ export interface CartItemResponse {
   finished_at: string;
   status: string;
   partner_id: number;
+  available_rooms?: number;
 }
 
 export interface CartResponse {

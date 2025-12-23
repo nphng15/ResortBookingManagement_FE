@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router'
+import { useParams, useSearchParams } from 'react-router'
 import GalleryPreview from '../../components/ResortSection/GalleryPreview'
 import { Container, CircularProgress } from '@mui/material'
 import SearchBar from '../../components/ResortSection/SearchBar'
@@ -17,10 +17,14 @@ const DESCRIPTIONS = [
 
 function ResortDetail() {
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
   const [resort, setResort] = useState<ResortDetailType | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { isChristmasTheme } = useChristmasTheme()
+
+  const checkin = searchParams.get('checkin') || undefined
+  const checkout = searchParams.get('checkout') || undefined
 
   useEffect(() => {
     const fetchResort = async () => {
@@ -29,7 +33,7 @@ function ResortDetail() {
       try {
         setLoading(true)
         setError(null)
-        const data = await getResortById(parseInt(id))
+        const data = await getResortById(parseInt(id), checkin, checkout)
         setResort(data)
       } catch (err) {
         setError('Không thể tải thông tin resort. Vui lòng thử lại.')
@@ -40,7 +44,7 @@ function ResortDetail() {
     }
 
     fetchResort()
-  }, [id])
+  }, [id, checkin, checkout])
 
   if (loading) {
     return (

@@ -7,7 +7,7 @@
 
 /* === HEADER: NẰM TRÊN CÙNG, TRÀN FULL === */
 .roomHeader {
-  @apply w-full px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 font-bold text-gray-800 text-2xl;
+  @apply w-full px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 font-bold text-gray-800 text-2xl flex items-center justify-between;
 }
 
 /* === NỘI DUNG: ẢNH + BẢNG GÓI === */

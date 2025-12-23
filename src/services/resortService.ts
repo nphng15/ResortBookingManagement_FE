@@ -24,6 +24,7 @@ export interface RoomType {
   bed_amount: number;
   people_amount: number;
   price: number;
+  available_rooms?: number;
 }
 
 export interface ResortDetail {
@@ -58,16 +59,24 @@ export const searchResorts = async (params: SearchParams): Promise<Resort[]> => 
   return data;
 };
 
-export const getResortById = async (id: number): Promise<ResortDetail> => {
-  const url = `${API_BASE_URL}/resorts?id=${id}`;
+export const getResortById = async (
+  id: number,
+  checkin?: string,
+  checkout?: string
+): Promise<ResortDetail> => {
+  const params = new URLSearchParams({ id: id.toString() });
+  if (checkin) params.set('checkin', checkin);
+  if (checkout) params.set('checkout', checkout);
+
+  const url = `${API_BASE_URL}/resorts?${params.toString()}`;
   console.log('Fetching resort detail:', url);
 
   const response = await fetch(url);
-  
+
   if (!response.ok) {
     throw new Error('Failed to fetch resort detail');
   }
-  
+
   return response.json();
 };
 

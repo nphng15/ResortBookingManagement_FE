@@ -23,7 +23,18 @@ function RoomList({ rooms }: RoomListProps) {
         <section key={room.id} className={styles.roomSection}>
           {/* HEADER: TRÊN CÙNG, TRÀN FULL */}
           <div className={styles.roomHeader}>
-            {room.name} - {room.area}m² - {room.bed_amount} giường - {room.people_amount} người
+            <span>{room.name} - {room.area}m² - {room.bed_amount} giường - {room.people_amount} người</span>
+            {room.available_rooms !== undefined && (
+              <span className={`ml-auto px-3 py-1 rounded-full text-sm font-medium ${
+                room.available_rooms > 0 
+                  ? 'bg-green-100 text-green-700' 
+                  : 'bg-red-100 text-red-700'
+              }`}>
+                {room.available_rooms > 0 
+                  ? `Còn ${room.available_rooms} phòng` 
+                  : 'Hết phòng'}
+              </span>
+            )}
           </div>
 
           {/* NỘI DUNG: ẢNH + BẢNG GÓI */}

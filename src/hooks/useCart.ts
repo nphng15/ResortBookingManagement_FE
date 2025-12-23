@@ -12,6 +12,7 @@ export interface CartItem {
   startedAt: string;
   finishedAt: string;
   partnerId?: number;
+  availableRooms?: number;
 }
 
 export interface ToastState {
@@ -32,6 +33,7 @@ const mapCartItem = (item: CartItemResponse): CartItem => ({
   startedAt: item.started_at,
   finishedAt: item.finished_at,
   partnerId: item.partner_id,
+  availableRooms: item.available_rooms,
 });
 
 export function useCart() {
