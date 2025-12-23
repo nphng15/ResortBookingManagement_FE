@@ -6,12 +6,13 @@ interface OfferFormProps {
   initialData?: Offer | null;
   roomTypes: RoomType[];
   services: ResortService[];
-  onSubmit: (data: CreateOfferRequest | UpdateOfferRequest) => Promise<void>;
+  onSubmit: (data: CreateOfferRequest) => Promise<void>;
+  onUpdateSubmit?: (data: UpdateOfferRequest) => Promise<void>;
   onCancel: () => void;
   submitting: boolean;
 }
 
-export default function OfferForm({ initialData, roomTypes, services, onSubmit, onCancel, submitting }: OfferFormProps) {
+export default function OfferForm({ initialData, roomTypes, services, onSubmit, onUpdateSubmit, onCancel, submitting }: OfferFormProps) {
   const isEditing = !!initialData;
 
   const [formData, setFormData] = useState({
@@ -48,8 +49,8 @@ export default function OfferForm({ initialData, roomTypes, services, onSubmit, 
     if (!isEditing && !formData.room_type_id) return setError('Vui lòng chọn loại phòng');
 
     try {
-      if (isEditing) {
-        await onSubmit({ name: formData.name, cost: formData.cost, service_ids: formData.service_ids });
+      if (isEditing && onUpdateSubmit) {
+        await onUpdateSubmit({ name: formData.name, cost: formData.cost, service_ids: formData.service_ids });
       } else {
         await onSubmit(formData as CreateOfferRequest);
       }

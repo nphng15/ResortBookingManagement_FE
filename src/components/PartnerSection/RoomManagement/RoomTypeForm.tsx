@@ -7,12 +7,13 @@ interface RoomTypeFormProps {
   initialData?: RoomType | null;
   services: ResortService[];
   onSubmit: (data: Omit<CreateRoomTypeRequest, 'resort_id'>) => Promise<void>;
+  onUpdateSubmit?: (data: UpdateRoomTypeRequest) => Promise<void>;
   onCancel: () => void;
   submitting: boolean;
   isEditing?: boolean;
 }
 
-export default function RoomTypeForm({ initialData, services, onSubmit, onCancel, submitting, isEditing: isEditingProp }: RoomTypeFormProps) {
+export default function RoomTypeForm({ initialData, services, onSubmit, onUpdateSubmit, onCancel, submitting, isEditing: isEditingProp }: RoomTypeFormProps) {
   const isEditing = isEditingProp ?? !!initialData;
 
   const [formData, setFormData] = useState({
@@ -66,8 +67,8 @@ export default function RoomTypeForm({ initialData, services, onSubmit, onCancel
     if (!isEditing && offerData.cost <= 0) return setError('Giá gói phải lớn hơn 0');
 
     try {
-      if (isEditing) {
-        await onSubmit(formData as UpdateRoomTypeRequest);
+      if (isEditing && onUpdateSubmit) {
+        await onUpdateSubmit(formData as UpdateRoomTypeRequest);
       } else {
         await onSubmit({ ...formData, image_urls: imageUrls, offer: offerData } as Omit<CreateRoomTypeRequest, 'resort_id'>);
       }

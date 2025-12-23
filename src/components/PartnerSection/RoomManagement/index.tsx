@@ -329,7 +329,8 @@ export default function RoomManagement() {
         <RoomTypeForm
           initialData={editingRoomType}
           services={services}
-          onSubmit={editingRoomType ? (data) => handleUpdateRoomType(data as UpdateRoomTypeRequest) : handleCreateRoomType}
+          onSubmit={handleCreateRoomType}
+          onUpdateSubmit={handleUpdateRoomType}
           onCancel={() => { setShowRoomTypeModal(false); setEditingRoomType(null); }}
           submitting={submitting}
           isEditing={!!editingRoomType}
@@ -346,7 +347,8 @@ export default function RoomManagement() {
           initialData={editingOffer}
           roomTypes={roomTypes}
           services={services}
-          onSubmit={editingOffer ? handleUpdateOffer : handleCreateOffer}
+          onSubmit={handleCreateOffer}
+          onUpdateSubmit={handleUpdateOffer}
           onCancel={() => { setShowOfferModal(false); setEditingOffer(null); }}
           submitting={submitting}
         />
