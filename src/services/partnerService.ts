@@ -28,7 +28,7 @@ export interface WithdrawalItem {
   amount: number;
   time: string;
   type: 'WITHDRAW';
-  status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 // Response /api/v1/partner/withdraw

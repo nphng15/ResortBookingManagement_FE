@@ -62,14 +62,17 @@ export default function RevenueManagement() {
     setIsProcessing(true);
     setMessage(null);
     try {
-      const result = await requestWithdrawal(amount);
-      setMessage({ type: 'success', text: result.message });
+      await requestWithdrawal(amount);
+      setMessage({
+        type: 'success',
+        text: 'Yêu cầu rút tiền đã được gửi thành công! Vui lòng chờ Admin duyệt.',
+      });
       setWithdrawAmount('');
       setTimeout(() => {
         setIsWithdrawOpen(false);
         setMessage(null);
         loadData();
-      }, 2000);
+      }, 2500);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Có lỗi xảy ra';
       setMessage({ type: 'error', text: errorMessage });
@@ -178,12 +181,28 @@ export default function RevenueManagement() {
                     <p className="text-xs text-gray-500">{formatDateTime(item.time)}</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm font-semibold text-orange-600">-{formatCurrency(item.amount)}</span>
-                    {item.status && (
-                      <p className={`text-xs mt-1 ${item.status === 'APPROVED' ? 'text-emerald-600' : item.status === 'PENDING' ? 'text-amber-600' : 'text-red-600'}`}>
-                        {item.status === 'APPROVED' ? 'Đã duyệt' : item.status === 'PENDING' ? 'Chờ duyệt' : 'Từ chối'}
-                      </p>
-                    )}
+                    <span className="text-sm font-semibold text-orange-600">
+                      -{formatCurrency(item.amount)}
+                    </span>
+                    <p
+                      className={`text-xs mt-1 px-2 py-0.5 rounded-full inline-block ${
+                        item.status === 'APPROVED'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : item.status === 'PENDING'
+                            ? 'bg-amber-100 text-amber-700'
+                            : item.status === 'REJECTED'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {item.status === 'APPROVED'
+                        ? '✓ Đã duyệt'
+                        : item.status === 'PENDING'
+                          ? '⏳ Chờ duyệt'
+                          : item.status === 'REJECTED'
+                            ? '✗ Từ chối'
+                            : 'Không xác định'}
+                    </p>
                   </div>
                 </div>
               ))

@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 interface BalanceMovement {
   date: string;
   amount: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 interface WithdrawalChartProps {
@@ -27,10 +28,13 @@ interface ChartDataPoint {
 }
 
 const processChartData = (withdrawals: BalanceMovement[]): ChartDataPoint[] => {
+  // Only count APPROVED withdrawals
+  const approvedWithdrawals = withdrawals.filter((w) => w.status === 'APPROVED');
+
   // Group by month
   const monthlyData: Record<string, number> = {};
-  
-  withdrawals.forEach((w) => {
+
+  approvedWithdrawals.forEach((w) => {
     const date = new Date(w.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     monthlyData[monthKey] = (monthlyData[monthKey] || 0) + w.amount;
@@ -83,7 +87,7 @@ export default function WithdrawalChart({ withdrawals }: WithdrawalChartProps) {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 className="font-semibold text-gray-900 mb-4">Thống kê rút tiền theo tháng</h2>
+      <h2 className="font-semibold text-gray-900 mb-4">Thống kê rút tiền đã duyệt theo tháng</h2>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
