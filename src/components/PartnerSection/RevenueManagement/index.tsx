@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CalendarDaysIcon, CurrencyDollarIcon, ClipboardDocumentListIcon, WalletIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
-import { StatCard, Modal, ActionButton, WithdrawalChart } from '../components';
+import { StatCard, Modal, ActionButton, WithdrawalChart, RevenueChart } from '../components';
 import { getPartnerStatistics, requestWithdrawal, type PartnerStatistics, type WithdrawalItem } from '../../../services/partnerService';
 
 const formatCurrency = (amount: number) => {
@@ -9,6 +9,14 @@ const formatCurrency = (amount: number) => {
 
 const formatDateTime = (dateStr: string) => {
   return new Date(dateStr).toLocaleString('vi-VN');
+};
+
+// Tính doanh thu năm hiện tại từ danh sách revenues
+const calculateYearlyRevenue = (revenues: { amount: number; time: string }[]) => {
+  const currentYear = new Date().getFullYear();
+  return revenues
+    .filter((r) => new Date(r.time).getFullYear() === currentYear)
+    .reduce((sum, r) => sum + r.amount, 0);
 };
 
 // Convert API withdrawal format to chart format
@@ -128,9 +136,14 @@ export default function RevenueManagement() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard title="Đặt phòng hôm nay" value={stats.new_bookings_today} icon={CalendarDaysIcon} color="blue" />
-        <StatCard title="Doanh thu tháng này" value={formatCurrency(stats.monthly_revenue)} icon={CurrencyDollarIcon} color="green" />
+        <StatCard title={`Doanh thu năm ${new Date().getFullYear()}`} value={formatCurrency(calculateYearlyRevenue(stats.balance_movements.revenues))} icon={CurrencyDollarIcon} color="green" />
         <StatCard title="Tổng đặt phòng" value={stats.total_bookings} icon={ClipboardDocumentListIcon} color="purple" />
         <StatCard title="Số dư hiện tại" value={formatCurrency(stats.current_balance)} icon={WalletIcon} color="orange" />
+      </div>
+
+      {/* Revenue Chart - Yearly */}
+      <div className="mb-8">
+        <RevenueChart revenues={stats.balance_movements.revenues} year={new Date().getFullYear()} />
       </div>
 
       {/* Withdrawal Chart */}
